@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Env
+.env
+
+# Expo
+.expo/
+web-build/
+
+# OS
+.DS_Store
+
+node_modules/
+.env
+.env.local
+.env.production
+.DS_Store
