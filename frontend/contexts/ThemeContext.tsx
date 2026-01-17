@@ -1,7 +1,8 @@
 "use client"
 
-import { createContext, useContext, type ReactNode } from "react"
+import { createContext, useContext, type ReactNode, useState, useEffect } from "react"
 import { useColorScheme as useSystemColorScheme } from "react-native"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 type Theme = "light" | "dark"
 
@@ -22,6 +23,8 @@ interface ThemeColors {
 interface ThemeContextType {
   theme: Theme
   colors: ThemeColors
+  isDark: boolean
+  toggleTheme: () => void
 }
 
 const lightColors: ThemeColors = {
@@ -56,10 +59,39 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemColorScheme = useSystemColorScheme()
-  const theme: Theme = systemColorScheme === "dark" ? "dark" : "light"
-  const colors = theme === "dark" ? darkColors : lightColors
+  const [userTheme, setUserTheme] = useState<Theme | null>(null)
 
-  return <ThemeContext.Provider value={{ theme, colors }}>{children}</ThemeContext.Provider>
+  useEffect(() => {
+    // Load saved theme preference on mount
+    const loadTheme = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem("userTheme")
+        if (savedTheme === "light" || savedTheme === "dark") {
+          setUserTheme(savedTheme)
+        }
+      } catch (error) {
+        console.error("Error loading theme:", error)
+      }
+    }
+    loadTheme()
+  }, [])
+
+  // Use user preference if set, otherwise use system preference
+  const isDark = userTheme !== null ? userTheme === "dark" : systemColorScheme === "dark"
+  const theme: Theme = isDark ? "dark" : "light"
+  const colors = isDark ? darkColors : lightColors
+
+  const toggleTheme = async () => {
+    const newTheme: Theme = isDark ? "light" : "dark"
+    setUserTheme(newTheme)
+    try {
+      await AsyncStorage.setItem("userTheme", newTheme)
+    } catch (error) {
+      console.error("Error saving theme:", error)
+    }
+  }
+
+  return <ThemeContext.Provider value={{ theme, colors, isDark, toggleTheme }}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {

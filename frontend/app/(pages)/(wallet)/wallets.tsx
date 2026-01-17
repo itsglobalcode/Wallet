@@ -16,11 +16,11 @@ import { useEffect, useState } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useRouter } from "expo-router"
 import Plus from "@/components/ui/plus-symbol"
-import Options from "@/components/options"
+import DotsIcon from "@/components/ui/dots-symbol"
 import { useTheme } from "@/contexts/ThemeContext"
 import Svg, { Path, Circle } from "react-native-svg"
 
-const ACCENT = "#FF6B35"
+const ACCENT = "#A855F7"
 
 const ChevronRightIcon = ({ size = 18, color = "#ccc" }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -34,6 +34,31 @@ const WalletIcon = ({ size = 22, color = "#000" }) => (
       d="M19 7h-1V6a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-8a3 3 0 0 0-3-3zM5 5h10a1 1 0 0 1 1 1v1H5a1 1 0 0 1 0-2zm15 11h-3a2 2 0 0 1 0-4h3v4z"
       fill={color}
     />
+  </Svg>
+)
+
+const SettingsIcon = ({ size = 18, color = "#000" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="2" />
+    <Path
+      d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </Svg>
+)
+
+const LogoutIcon = ({ size = 18, color = "#000" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path d="M16 17l5-5-5-5M21 12H9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </Svg>
 )
 
@@ -77,7 +102,8 @@ export default function WalletsScreen() {
 
   const [name, setName] = useState("")
   const [currency, setCurrency] = useState("EUR")
-  const [type, setType] = useState("personal")
+
+  const [optionsVisible, setOptionsVisible] = useState(false)
 
   const router = useRouter()
 
@@ -103,7 +129,7 @@ export default function WalletsScreen() {
       const res = await fetch(`http://localhost:3000/api/wallet/wallets`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, name, currency, icon: "wallet", type }),
+        body: JSON.stringify({ userId, name, currency, icon: "wallet" }),
       })
       if (!res.ok) {
         const err = await res.json()
@@ -111,7 +137,6 @@ export default function WalletsScreen() {
       }
       setName("")
       setCurrency("EUR")
-      setType("personal")
       setCreateWalletVisible(false)
       await loadWallets()
     } catch (error: any) {
@@ -119,28 +144,47 @@ export default function WalletsScreen() {
     }
   }
 
+  const handleLogout = async () => {
+    setOptionsVisible(false)
+    await AsyncStorage.removeItem("userId")
+    await AsyncStorage.removeItem("token")
+    router.push("/(auth)/login" as any)
+  }
+
+  const handleSettings = () => {
+    setOptionsVisible(false)
+    router.push("/(pages)/user" as any)
+  }
+
   const totalBalance = wallets.reduce((acc, w) => acc + (w.balance || 0), 0)
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Wallets</Text>
-        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-          {wallets.length} {wallets.length === 1 ? "cuenta" : "cuentas"}
-        </Text>
+        <View style={styles.headerTitleWrapper}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Wallets</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            {wallets.length} {wallets.length === 1 ? "cuenta" : "cuentas"}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={[styles.headerBtn, { backgroundColor: colors.surface }]}
+          onPress={() => setOptionsVisible(!optionsVisible)}
+        >
+          <DotsIcon color={colors.text} />
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.summaryCard, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Balance total</Text>
+        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Powered by Nomad</Text>
         <Text style={[styles.summaryAmount, { color: colors.text }]}>
-          {totalBalance.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
-          <Text style={[styles.summaryCurrency, { color: colors.textTertiary }]}> €</Text>
+          The Neon Wallet
         </Text>
       </View>
 
       <FlatList
         contentContainerStyle={styles.listContainer}
-        data={wallets.filter(w => !w.archived)}
+        data={wallets.filter((w) => !w.archived)}
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
@@ -155,7 +199,7 @@ export default function WalletsScreen() {
                 <Text style={[styles.walletName, { color: colors.text }]}>{item.name}</Text>
                 <View style={styles.walletMeta}>
                   <Text style={[styles.walletCurrency, { color: colors.textTertiary }]}>{item.currency}</Text>
-                  {item.type === "shared" && (
+                  {item.users?.length > 1 && (
                     <View style={styles.sharedBadge}>
                       <UsersIcon size={12} color={colors.textTertiary} />
                     </View>
@@ -211,26 +255,9 @@ export default function WalletsScreen() {
               <ChevronRightIcon color={colors.textTertiary} />
             </TouchableOpacity>
 
-            <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Tipo</Text>
-            <View style={styles.typeRow}>
-              {["personal", "shared"].map((t) => (
-                <TouchableOpacity
-                  key={t}
-                  style={[
-                    styles.typeOption,
-                    { backgroundColor: colors.surface, borderColor: type === t ? ACCENT : colors.surfaceBorder },
-                  ]}
-                  onPress={() => setType(t)}
-                >
-                  <View style={[styles.radioOuter, { borderColor: type === t ? ACCENT : colors.textTertiary }]}>
-                    {type === t && <View style={[styles.radioInner, { backgroundColor: ACCENT }]} />}
-                  </View>
-                  <Text style={[styles.typeText, { color: colors.text }]}>
-                    {t === "personal" ? "Personal" : "Compartida"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Text style={[styles.hintText, { color: colors.textTertiary }]}>
+              Puedes compartir la wallet con otros usuarios usando el icono de compartir
+            </Text>
 
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setCreateWalletVisible(false)}>
@@ -273,7 +300,18 @@ export default function WalletsScreen() {
         </View>
       </Modal>
 
-      <Options />
+      {optionsVisible && (
+        <View style={[styles.optionsMenu, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
+          <TouchableOpacity style={styles.optionItem} onPress={handleSettings}>
+            <SettingsIcon size={18} color={colors.text} />
+            <Text style={[styles.optionText, { color: colors.text }]}>Configuración</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionItem} onPress={handleLogout}>
+            <LogoutIcon size={18} color="#C62828" />
+            <Text style={[styles.optionText, { color: "#C62828" }]}>Cerrar sesión</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   )
 }
@@ -281,7 +319,17 @@ export default function WalletsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
 
-  header: { paddingTop: 60, paddingHorizontal: 24, paddingBottom: 8 },
+  header: {
+    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerTitleWrapper: {
+    flex: 1,
+  },
   headerTitle: { fontSize: 32, fontWeight: "700", letterSpacing: -0.5 },
   headerSubtitle: { fontSize: 14, marginTop: 4 },
 
@@ -344,31 +392,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 12,
   },
   selectorFlag: { fontSize: 20 },
   selectorText: { flex: 1, fontSize: 16, fontWeight: "500" },
 
-  typeRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
-  typeOption: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  radioInner: { width: 10, height: 10, borderRadius: 5 },
-  typeText: { fontSize: 15, fontWeight: "500" },
+  hintText: { fontSize: 12, marginBottom: 24, textAlign: "center" },
 
   modalActions: { flexDirection: "row", gap: 12 },
   cancelBtn: { flex: 1, paddingVertical: 16, alignItems: "center" },
@@ -381,4 +410,28 @@ const styles = StyleSheet.create({
   currencyItemFlag: { fontSize: 24 },
   currencyItemCode: { flex: 1, fontSize: 16, fontWeight: "500" },
   checkDot: { width: 8, height: 8, borderRadius: 4 },
+
+  headerBtn: { width: 40, height: 40, borderRadius: 12, justifyContent: "center", alignItems: "center" },
+  optionsMenu: {
+    position: "absolute",
+    top: 110,
+    right: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    minWidth: 180,
+  },
+  optionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+  },
+  optionText: { fontSize: 15, fontWeight: "500" },
 })

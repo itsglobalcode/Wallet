@@ -16,7 +16,7 @@ export default function Index() {
         try {
             const userId = await AsyncStorage.getItem("userId")
             const isVerified = await AsyncStorage.getItem("isVerified")
-
+            console.log(userId, isVerified)
             if (userId && isVerified === "true") {
                 router.replace("/(tabs)")
             } else {

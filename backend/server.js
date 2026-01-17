@@ -59,6 +59,9 @@ app.use("/api/user", require("./routes/user"))
 // Tpdas las rutas para el wallet empiezan por /api/wallet
 app.use("/api/wallet", require("./routes/wallet"))
 
+// Tpdas las rutas para el wallet empiezan por /api/search
+app.use("/api/search", require("./routes/search"))
+
 // =====================
 // Ruta raíz
 // =====================

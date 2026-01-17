@@ -14,7 +14,6 @@ import {
   Text,
 } from "react-native"
 import { router } from "expo-router"
-import { ThemedText } from "@/components/themed-text"
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("")
@@ -39,14 +38,14 @@ export default function ForgotPasswordScreen() {
       const data = await response.json()
 
       if (response.ok) {
-        Alert.alert("Éxito", "Se ha enviado un código de recuperación a tu email", [
+        Alert.alert("Éxito", "Se ha enviado un enlace de recuperación a tu email", [
           {
             text: "OK",
-            onPress: () => router.push({ pathname: "/reset-password" as any, params: { email } }),
+            onPress: () => router.push("/(auth)/reset-password" as any),
           },
         ])
       } else {
-        Alert.alert("Error", data.message || "Error al enviar código")
+        Alert.alert("Error", data.message || "Error al enviar enlace")
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo conectar con el servidor")
@@ -65,21 +64,21 @@ export default function ForgotPasswordScreen() {
         >
           <View style={styles.centerWrapper}>
             <View style={styles.content}>
-              <Text style={styles.brandName}>NOMAD</Text>
-              <Text style={styles.tagline}>Tu viaje empieza aquí</Text>
+              <View style={styles.brandSection}>
+                <Text style={styles.brandName}>NeonWallet</Text>
+                <Text style={styles.tagline}>powered by Nomad</Text>
+              </View>
 
-              <ThemedText type="title" style={styles.title}>
-                Recuperar Contraseña
-              </ThemedText>
+              <Text style={styles.title}>Recuperar Contraseña</Text>
 
-              <ThemedText style={styles.description}>
-                Ingresa tu email y te enviaremos un código para restablecer tu contraseña.
-              </ThemedText>
+              <Text style={styles.description}>
+                Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.
+              </Text>
 
               <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor="#999"
+                placeholderTextColor="#666"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -87,11 +86,11 @@ export default function ForgotPasswordScreen() {
               />
 
               <TouchableOpacity style={styles.button} onPress={handleForgotPassword} disabled={loading}>
-                <ThemedText style={styles.buttonText}>{loading ? "Enviando..." : "Enviar Código"}</ThemedText>
+                <Text style={styles.buttonText}>{loading ? "Enviando..." : "Enviar Enlace"}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <ThemedText style={styles.backText}>Volver al inicio de sesión</ThemedText>
+                <Text style={styles.backText}>Volver al inicio de sesión</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -104,11 +103,11 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0a0a0a",
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0a0a0a",
   },
   scrollContent: {
     flexGrow: 1,
@@ -120,55 +119,56 @@ const styles = StyleSheet.create({
     minHeight: "100%",
   },
   content: {
-    backgroundColor: "#fff",
-    padding: 40,
+    padding: 32,
     width: "100%",
-    maxWidth: 400,
+    maxWidth: 380,
+  },
+  brandSection: {
+    alignItems: "center",
+    marginBottom: 40,
   },
   brandName: {
-    fontSize: 36,
-    fontWeight: "900",
-    color: "#000",
-    marginBottom: 8,
-    letterSpacing: 4,
-    textAlign: "center",
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666",
-    marginBottom: 40,
-    textAlign: "center",
+    marginTop: 6,
     fontWeight: "400",
+    letterSpacing: 0.5,
   },
   title: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#fff",
     marginBottom: 16,
     textAlign: "center",
-    fontSize: 24,
-    color: "#333",
-    fontWeight: "600",
   },
   description: {
-    marginBottom: 32,
-    textAlign: "center",
     fontSize: 14,
     color: "#666",
+    marginBottom: 32,
+    textAlign: "center",
     lineHeight: 20,
   },
   input: {
-    height: 52,
+    height: 56,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    borderColor: "#222",
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    marginBottom: 14,
     fontSize: 16,
-    backgroundColor: "#fafafa",
-    color: "#000",
+    backgroundColor: "#111",
+    color: "#fff",
   },
   button: {
-    backgroundColor: "#000",
-    height: 52,
-    borderRadius: 12,
+    backgroundColor: "#A855F7",
+    height: 56,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 8,

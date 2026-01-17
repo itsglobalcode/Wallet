@@ -22,7 +22,7 @@ import Svg, { Path } from "react-native-svg"
 const API_KEY = "2e2ad80d158c4b9d96b5640f3fa1a4ad"
 const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${API_KEY}`
 
-const ACCENT = "#FF6B35"
+const ACCENT = "#A855F7"
 
 const ArrowLeftIcon = ({ size = 22, color = "#000" }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

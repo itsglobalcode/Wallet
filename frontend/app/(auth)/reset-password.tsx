@@ -14,17 +14,20 @@ import {
   Text,
 } from "react-native"
 import { router, useLocalSearchParams } from "expo-router"
-import { ThemedText } from "@/components/themed-text"
 
-export default function ResetPasswordScreen() {
-  const { email } = useLocalSearchParams()
-  const [code, setCode] = useState("")
+export default function AuthResetPasswordScreen() {
+  const { token } = useLocalSearchParams()
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleResetPassword = async () => {
-    if (!code || !newPassword || !confirmPassword) {
+    if (!token) {
+      Alert.alert("Error", "Token inválido. Solicita un nuevo enlace de recuperación.")
+      return
+    }
+
+    if (!newPassword || !confirmPassword) {
       Alert.alert("Error", "Por favor completa todos los campos")
       return
     }
@@ -46,7 +49,7 @@ export default function ResetPasswordScreen() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, resetToken: code, newPassword }),
+        body: JSON.stringify({ resetToken: token, newPassword }),
       })
 
       const data = await response.json()
@@ -55,7 +58,7 @@ export default function ResetPasswordScreen() {
         Alert.alert("Éxito", "Contraseña restablecida correctamente", [
           {
             text: "OK",
-            onPress: () => router.replace("/login" as any),
+            onPress: () => router.replace("/(auth)/login" as any),
           },
         ])
       } else {
@@ -78,31 +81,19 @@ export default function ResetPasswordScreen() {
         >
           <View style={styles.centerWrapper}>
             <View style={styles.content}>
-              <Text style={styles.brandName}>NOMAD</Text>
-              <Text style={styles.tagline}>Tu viaje empieza aquí</Text>
+              <View style={styles.brandSection}>
+                <Text style={styles.brandName}>NeonWallet</Text>
+                <Text style={styles.tagline}>powered by Nomad</Text>
+              </View>
 
-              <ThemedText type="title" style={styles.title}>
-                Nueva Contraseña
-              </ThemedText>
+              <Text style={styles.title}>Nueva Contraseña</Text>
 
-              <ThemedText style={styles.description}>
-                Ingresa el código que recibiste en tu email y tu nueva contraseña.
-              </ThemedText>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Código de recuperación"
-                placeholderTextColor="#999"
-                value={code}
-                onChangeText={setCode}
-                keyboardType="number-pad"
-                maxLength={6}
-              />
+              <Text style={styles.description}>Ingresa tu nueva contraseña para acceder a tu cuenta.</Text>
 
               <TextInput
                 style={styles.input}
                 placeholder="Nueva contraseña"
-                placeholderTextColor="#999"
+                placeholderTextColor="#666"
                 value={newPassword}
                 onChangeText={setNewPassword}
                 secureTextEntry
@@ -111,18 +102,18 @@ export default function ResetPasswordScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Confirmar nueva contraseña"
-                placeholderTextColor="#999"
+                placeholderTextColor="#666"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
               />
 
               <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={loading}>
-                <ThemedText style={styles.buttonText}>{loading ? "Guardando..." : "Restablecer Contraseña"}</ThemedText>
+                <Text style={styles.buttonText}>{loading ? "Guardando..." : "Restablecer Contraseña"}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <ThemedText style={styles.backText}>Volver</ThemedText>
+                <Text style={styles.backText}>Volver</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -135,11 +126,11 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0a0a0a",
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0a0a0a",
   },
   scrollContent: {
     flexGrow: 1,
@@ -151,55 +142,56 @@ const styles = StyleSheet.create({
     minHeight: "100%",
   },
   content: {
-    backgroundColor: "#fff",
-    padding: 40,
+    padding: 32,
     width: "100%",
-    maxWidth: 400,
+    maxWidth: 380,
+  },
+  brandSection: {
+    alignItems: "center",
+    marginBottom: 40,
   },
   brandName: {
-    fontSize: 36,
-    fontWeight: "900",
-    color: "#000",
-    marginBottom: 8,
-    letterSpacing: 4,
-    textAlign: "center",
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666",
-    marginBottom: 40,
-    textAlign: "center",
+    marginTop: 6,
     fontWeight: "400",
+    letterSpacing: 0.5,
   },
   title: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#fff",
     marginBottom: 16,
     textAlign: "center",
-    fontSize: 24,
-    color: "#333",
-    fontWeight: "600",
   },
   description: {
-    marginBottom: 32,
-    textAlign: "center",
     fontSize: 14,
     color: "#666",
+    marginBottom: 32,
+    textAlign: "center",
     lineHeight: 20,
   },
   input: {
-    height: 52,
+    height: 56,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    borderColor: "#222",
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    marginBottom: 14,
     fontSize: 16,
-    backgroundColor: "#fafafa",
-    color: "#000",
+    backgroundColor: "#111",
+    color: "#fff",
   },
   button: {
-    backgroundColor: "#000",
-    height: 52,
-    borderRadius: 12,
+    backgroundColor: "#A855F7",
+    height: 56,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 8,

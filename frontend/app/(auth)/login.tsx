@@ -14,7 +14,6 @@ import {
   Text,
 } from "react-native"
 import { Link, router } from "expo-router"
-import { ThemedText } from "@/components/themed-text"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export default function LoginScreen() {
@@ -41,13 +40,12 @@ export default function LoginScreen() {
       const data = await response.json()
 
       if (response.ok) {
-        await AsyncStorage.setItem("userId", data.userId)
-        if (data.requires2FA) {
-          router.replace("/(auth)/verify-2fa")
-        } else {
-          Alert.alert("Éxito", "Inicio de sesión exitoso")
-          router.replace("/(pages)/home")
-        }
+        await AsyncStorage.setItem("userId", data.user.id)
+        await AsyncStorage.setItem("userName", data.user.name)
+        await AsyncStorage.setItem("userEmail", data.user.email)
+        await AsyncStorage.setItem("isVerified", "true")
+        Alert.alert("Éxito", "Inicio de sesión exitoso")
+        router.replace("/(tabs)")
       } else {
         Alert.alert("Error", data.message || "Error al iniciar sesión")
       }
@@ -68,17 +66,15 @@ export default function LoginScreen() {
         >
           <View style={styles.centerWrapper}>
             <View style={styles.content}>
-              <Text style={styles.brandName}>NOMAD</Text>
-              <Text style={styles.tagline}>Tu viaje empieza aquí</Text>
-
-              <ThemedText type="title" style={styles.title}>
-                Bienvenido
-              </ThemedText>
+              <View style={styles.brandSection}>
+                <Text style={styles.brandName}>NeonWallet</Text>
+                <Text style={styles.tagline}>powered by Nomad</Text>
+              </View>
 
               <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor="#999"
+                placeholderTextColor="#666"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -88,25 +84,27 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
-                placeholderTextColor="#999"
+                placeholderTextColor="#666"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
               />
 
               <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-                <ThemedText style={styles.buttonText}>{loading ? "Cargando..." : "Iniciar Sesión"}</ThemedText>
+                <Text style={styles.buttonText}>{loading ? "Cargando..." : "Iniciar Sesión"}</Text>
               </TouchableOpacity>
 
               <Link href="/(auth)/register" style={styles.link} asChild>
                 <TouchableOpacity>
-                  <ThemedText style={styles.linkText}>¿No tienes cuenta? Regístrate</ThemedText>
+                  <Text style={styles.linkText}>
+                    ¿No tienes cuenta? <Text style={styles.linkHighlight}>Regístrate</Text>
+                  </Text>
                 </TouchableOpacity>
               </Link>
 
               <Link href="/(auth)/forgot-password" style={styles.forgotLink} asChild>
                 <TouchableOpacity>
-                  <ThemedText style={styles.forgotText}>¿Olvidaste tu contraseña?</ThemedText>
+                  <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
                 </TouchableOpacity>
               </Link>
             </View>
@@ -120,11 +118,11 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0a0a0a",
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0a0a0a",
   },
   scrollContent: {
     flexGrow: 1,
@@ -136,48 +134,42 @@ const styles = StyleSheet.create({
     minHeight: "100%",
   },
   content: {
-    backgroundColor: "#fff",
-    padding: 40,
+    padding: 32,
     width: "100%",
-    maxWidth: 400,
+    maxWidth: 380,
+  },
+  brandSection: {
+    alignItems: "center",
+    marginBottom: 48,
   },
   brandName: {
-    fontSize: 36,
-    fontWeight: "900",
-    color: "#000",
-    marginBottom: 8,
-    letterSpacing: 4,
-    textAlign: "center",
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666",
-    marginBottom: 40,
-    textAlign: "center",
+    marginTop: 6,
     fontWeight: "400",
-  },
-  title: {
-    marginBottom: 32,
-    textAlign: "center",
-    fontSize: 24,
-    color: "#333",
-    fontWeight: "600",
+    letterSpacing: 0.5,
   },
   input: {
-    height: 52,
+    height: 56,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    borderColor: "#222",
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    marginBottom: 14,
     fontSize: 16,
-    backgroundColor: "#fafafa",
-    color: "#000",
+    backgroundColor: "#111",
+    color: "#fff",
   },
   button: {
-    backgroundColor: "#000",
-    height: 52,
-    borderRadius: 12,
+    backgroundColor: "#A855F7",
+    height: 56,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 8,
@@ -195,8 +187,12 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 14,
   },
+  linkHighlight: {
+    color: "#A855F7",
+    fontWeight: "600",
+  },
   forgotLink: {
-    marginTop: 16,
+    marginTop: 12,
     alignSelf: "center",
   },
   forgotText: {
