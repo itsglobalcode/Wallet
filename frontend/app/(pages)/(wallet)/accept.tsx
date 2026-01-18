@@ -19,8 +19,6 @@ export default function AcceptInvite() {
     const { id, token } = useLocalSearchParams<{ id: string; token: string }>()
     const router = useRouter()
 
-    console.log("id:", id, "token:", token)
-
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -53,8 +51,7 @@ export default function AcceptInvite() {
                     setLoading(false)
                     return
                 }
-            } catch (err) {
-                console.error(err)
+            } catch {
                 setError("Error al aceptar la invitación")
                 setLoading(false)
             }

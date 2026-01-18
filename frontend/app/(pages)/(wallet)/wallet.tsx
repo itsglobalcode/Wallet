@@ -745,7 +745,6 @@ export default function WalletDetailScreen() {
                     onPress={() => setSelectedUser(item)}
                   >
                     <Text style={[styles.userName, { color: colors.text }]}>{item.name}</Text>
-                    <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{item.email}</Text>
                   </TouchableOpacity>
                 )}
               />

@@ -33,7 +33,6 @@ app.use(express.json())
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log("✅ MongoDB conectado exitosamente")
     verifyEmailConfig()
   })
   .catch((err) => console.error("❌ Error al conectar MongoDB:", err))
@@ -45,13 +44,6 @@ mongoose
 // Todas las rutas de autenticación empiezan por /api/auth
 const authRoutes = require("./routes/auth")
 app.use("/api/auth", authRoutes)
-
-console.log("📋 Rutas de autenticación cargadas:")
-console.log("   POST /api/auth/register")
-console.log("   POST /api/auth/login")
-console.log("   POST /api/auth/2fa/send-code")
-console.log("   POST /api/auth/2fa/verify")
-console.log("   POST /api/auth/login/2fa")
 
 // Todas las rutas para el usuario empiezan por /api/user
 app.use("/api/user", require("./routes/user"))
@@ -79,6 +71,4 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 3000
 
 // Iniciamos el servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en puerto ${PORT}`)
-})
+app.listen(PORT)

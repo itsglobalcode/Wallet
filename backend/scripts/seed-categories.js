@@ -22,26 +22,19 @@ const defaultCategories = [
 async function seedCategories() {
   try {
     const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:27017/nomad"
-    console.log("Connecting to:", mongoUrl)
     await mongoose.connect(mongoUrl)
-    console.log("Connected to MongoDB")
 
     // Check if categories already exist
     const existingCount = await Category.countDocuments()
     if (existingCount > 0) {
-      console.log(`Found ${existingCount} existing categories. Skipping seed.`)
-      console.log("If you want to add new categories, delete existing ones first or add them manually.")
       await mongoose.disconnect()
       return
     }
 
     // Insert all categories
-    const result = await Category.insertMany(defaultCategories)
-    console.log(`Successfully created ${result.length} categories:`)
-    result.forEach((cat) => console.log(`  - ${cat.name} (${cat.href})`))
+    await Category.insertMany(defaultCategories)
 
     await mongoose.disconnect()
-    console.log("Done!")
   } catch (error) {
     console.error("Error seeding categories:", error)
     process.exit(1)

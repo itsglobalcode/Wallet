@@ -182,8 +182,7 @@ export default function Verify2FAScreen() {
         setCode(["", "", "", "", "", ""])
         inputRefs.current[0]?.focus()
       }
-    } catch (error) {
-      console.error("Verify error:", error)
+    } catch {
       Alert.alert("Error de conexión", "No se pudo conectar con el servidor. Verifica tu conexión a internet.")
     } finally {
       setLoading(false)

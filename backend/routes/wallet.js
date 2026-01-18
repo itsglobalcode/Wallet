@@ -62,7 +62,6 @@ router.post("/wallets", async (req, res) => {
 router.post("/invite", async (req, res) => {
   try {
     const { walletId, userId, inviteId } = req.body
-    console.log(walletId, userId, inviteId)
     if (!walletId || !userId) {
       return res.status(400).json({ error: "Faltan datos obligatorios" })
     }
@@ -91,8 +90,6 @@ router.post("/invite", async (req, res) => {
       wallet: walletId,
       user: userId,
     })
-
-    console.log(invite)
 
     await invite.save()
 
@@ -182,18 +179,15 @@ router.get("/get-wallet", async (req, res) => {
 router.put("/edit-wallet", async (req, res) => {
   try {
     const { id, name, currency, budget } = req.body
-    console.log(id, name, currency, budget)
     if (!id || !name || !currency) {
       return res.status(400).json({ error: "Faltan datos obligatorios" })
     }
 
     const wallet = await Wallet.findById(id)
-    console.log(wallet)
 
     wallet.name = name
     wallet.currency = currency
     wallet.budget = budget
-    console.log(wallet)
 
     await wallet.save()
 

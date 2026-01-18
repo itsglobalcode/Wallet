@@ -33,10 +33,9 @@ router.get("/users", async (req, res) => {
 
     const filteredUsers = searchUsers(users, query, id);
 
-    res.json({ users: filteredUsers });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al buscar usuarios" });
+    res.json({ users: filteredUsers })
+  } catch {
+    res.status(500).json({ error: "Error al buscar usuarios" })
   }
 });
 

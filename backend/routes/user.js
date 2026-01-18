@@ -39,10 +39,9 @@ router.get("/get_info", async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
 
-    res.json(user); // devuelve el usuario
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error al obtener la información del usuario" });
+    res.json(user)
+  } catch {
+    res.status(500).json({ message: "Error al obtener la información del usuario" })
   }
 });
 

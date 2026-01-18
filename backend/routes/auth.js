@@ -50,10 +50,8 @@ router.post("/register", async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Register error:", error)
     res.status(500).json({
       message: "Error al crear la cuenta",
-      error: error.message,
     })
   }
 })
@@ -98,10 +96,8 @@ router.post("/login", async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Login error:", error)
     res.status(500).json({
       message: "Error al iniciar sesión",
-      error: error.message,
     })
   }
 })
@@ -133,10 +129,8 @@ router.post("/forgot-password", async (req, res) => {
     const emailResult = await sendPasswordResetLink(user.email, resetToken, user.name)
 
     if (!emailResult.success) {
-      console.error("Error enviando email de recuperación:", emailResult.error)
       return res.status(500).json({
-        message: "Error al enviar el email. Verifica la configuración del servidor de email.",
-        error: emailResult.error,
+        message: "Error al enviar el email de recuperación",
       })
     }
 
@@ -145,10 +139,8 @@ router.post("/forgot-password", async (req, res) => {
       email: user.email.replace(/(.{2})(.*)(@.*)/, "$1***$3"),
     })
   } catch (error) {
-    console.error("Forgot password error:", error)
     res.status(500).json({
       message: "Error al procesar solicitud",
-      error: error.message,
     })
   }
 })
@@ -189,10 +181,8 @@ router.post("/reset-password", async (req, res) => {
 
     res.json({ message: "Contraseña actualizada correctamente" })
   } catch (error) {
-    console.error("Reset password error:", error)
     res.status(500).json({
       message: "Error al actualizar contraseña",
-      error: error.message,
     })
   }
 })

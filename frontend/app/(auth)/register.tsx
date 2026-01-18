@@ -61,8 +61,7 @@ export default function RegisterScreen() {
       } else {
         Alert.alert("Error", data.message || "Error al crear la cuenta")
       }
-    } catch (error) {
-      console.error("Register error:", error)
+    } catch {
       Alert.alert("Error", "No se pudo conectar con el servidor")
     } finally {
       setLoading(false)

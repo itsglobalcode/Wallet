@@ -1,26 +1,13 @@
-const nodemailer = require("nodemailer")
+const { Resend } = require("resend")
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: Number.parseInt(process.env.EMAIL_PORT) || 587,
-  secure: false, // false para puerto 587 (TLS)
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false, // Permite certificados autofirmados
-  },
-  logger: true, // Activa logs de nodemailer
-  debug: true, // Activa modo debug
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Función para enviar invitación a wallet compartido
 const sendWalletInvitationEmail = async ({ email, invitedUserName, inviterName, walletName, acceptUrl }) => {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_FROM || "NOMAD <noreply@nomad.com>",
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || "NOMAD <onboarding@resend.dev>",
+      to: [email],
       subject: `Invitación a wallet compartido - ${walletName}`,
       html: `
         <!DOCTYPE html>
@@ -29,52 +16,87 @@ const sendWalletInvitationEmail = async ({ email, invitedUserName, inviterName, 
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #000; color: #fff; padding: 30px; text-align: center; }
-            .brand { font-size: 32px; font-weight: 900; letter-spacing: 4px; }
-            .card { background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px; }
-            .wallet-box { background: #f4f4f4; border: 2px dashed #000; padding: 20px; text-align: center; margin: 30px 0; border-radius: 8px; }
-            .wallet-name { font-size: 26px; font-weight: 700; color: #000; }
+            .header { background: #0a0a0a; color: #fff; padding: 30px; text-align: center; border-radius: 14px 14px 0 0; }
+            .brand { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
+            .tagline { font-size: 13px; color: #666; margin-top: 6px; }
+            .content-area { background: #0a0a0a; padding: 30px 20px; }
+            .content-area h2, .content-area p { color: #fff; }
+            .content-area p { color: #999; }
+            .wallet-box { 
+              background: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
+              border: 2px solid #A855F7;
+              padding: 30px;
+              text-align: center;
+              margin: 30px 0;
+              border-radius: 14px;
+              box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+            }
+            .wallet-name { 
+              font-size: 28px; 
+              font-weight: 700; 
+              color: #fff;
+              text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            }
+            .inviter-name {
+              color: #A855F7;
+              font-weight: 700;
+            }
             .button {
               display: inline-block;
-              background: #000;
+              background: #A855F7;
               color: #fff !important;
-              padding: 14px 28px;
-              border-radius: 8px;
+              padding: 14px 32px;
+              border-radius: 14px;
               text-decoration: none;
               font-weight: 700;
               margin-top: 20px;
+              box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+              transition: all 0.3s ease;
             }
-            .footer { text-align: center; color: #666; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+            .button:hover {
+              background: #9333EA;
+              box-shadow: 0 6px 30px rgba(168, 85, 247, 0.6);
+            }
+            .footer { 
+              text-align: center; 
+              color: #666; 
+              font-size: 14px; 
+              margin-top: 30px; 
+              padding: 20px; 
+              background: #0a0a0a; 
+              border-top: 1px solid #222;
+              border-radius: 0 0 14px 14px;
+            }
           </style>
         </head>
-        <body>
+        <body style="background: #0a0a0a; margin: 0; padding: 20px;">
           <div class="container">
             <div class="header">
-              <div class="brand">NOMAD</div>
-              <p style="margin: 10px 0 0 0; font-size: 14px;">Tu viaje empieza aquí</p>
+              <div class="brand">NeonWallet</div>
+              <p class="tagline">powered by Nomad</p>
             </div>
 
-            <div class="card">
-              <h2>Hola ${invitedUserName},</h2>
-              <p><strong>${inviterName}</strong> te ha invitado a unirte a un wallet compartido.</p>
+            <div class="content-area">
+              <h2 style="color: #fff; margin-bottom: 20px;">Hola ${invitedUserName},</h2>
+              <p style="color: #999;"><span class="inviter-name">${inviterName}</span> te ha invitado a unirte a un wallet compartido.</p>
 
               <div class="wallet-box">
                 <div class="wallet-name">${walletName}</div>
               </div>
 
-              <p>Al aceptar esta invitación podrás ver y gestionar los gastos compartidos.</p>
+              <p style="color: #999;">Al aceptar esta invitación podrás ver y gestionar los gastos compartidos en tiempo real.</p>
 
               <div style="text-align: center;">
-                <a href="${acceptUrl}" class="button">Aceptar invitación</a>
+                <a href="${acceptUrl}" class="button">Aceptar Invitación</a>
               </div>
 
-              <p style="margin-top: 30px;">
-                Si no reconoces esta invitación, puedes ignorar este correo.
+              <p style="margin-top: 30px; color: #666; font-size: 14px;">
+                Si no reconoces esta invitación, puedes ignorar este correo de forma segura.
               </p>
             </div>
 
             <div class="footer">
-              <p>NOMAD App - Wallets compartidos</p>
+              <p>NeonWallet - Wallets compartidos</p>
               <p>Este es un correo automático, por favor no respondas.</p>
             </div>
           </div>
@@ -95,31 +117,27 @@ Si no reconoces esta invitación, puedes ignorar este correo.
 
 NOMAD App - Tu viaje empieza aquí
       `,
+    })
+
+    if (error) {
+      return { success: false, error: error.message }
     }
 
-    const info = await transporter.sendMail(mailOptions)
-
-    return { success: true, messageId: info.messageId }
-  } catch (error) {
-    console.error("❌ Error al enviar invitación de wallet")
-    console.error("Nombre del error:", error.name)
-    console.error("Mensaje:", error.message)
-    console.error("Stack:", error.stack)
-    console.error("Código:", error.code)
-    console.error("Comando:", error.command)
-
-    return { success: false, error: error.message }
+    return { success: true, messageId: data?.id }
+  } catch {
+    return { success: false, error: "Error al enviar invitación" }
   }
 }
 
 // Verificar configuración de email
 const verifyEmailConfig = async () => {
   try {
-    await transporter.verify()
-    console.log("✅ Configuración de email verificada correctamente")
+    if (!process.env.RESEND_API_KEY) {
+      console.error("❌ RESEND_API_KEY no está configurada")
+      return false
+    }
     return true
-  } catch (error) {
-    console.error("❌ Error en configuración de email:", error.message)
+  } catch {
     return false
   }
 }
@@ -129,9 +147,9 @@ const sendPasswordResetLink = async (email, resetToken, userName) => {
   try {
     const resetLink = `http://localhost:8081/reset-password?token=${resetToken}`
 
-    const mailOptions = {
-      from: process.env.EMAIL_FROM || "NOMAD <noreply@nomad.com>",
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || "NOMAD <onboarding@resend.dev>",
+      to: [email],
       subject: "Recuperación de contraseña - NeonWallet",
       html: `
         <!DOCTYPE html>
@@ -199,20 +217,15 @@ Si no solicitaste restablecer tu contraseña, ignora este mensaje.
 
 NeonWallet - powered by Nomad
       `,
+    })
+
+    if (error) {
+      return { success: false, error: error.message }
     }
 
-    const info = await transporter.sendMail(mailOptions)
-
-    return { success: true, messageId: info.messageId }
-  } catch (error) {
-    console.error("Error detallado al enviar email de recuperación:")
-    console.error("Nombre del error:", error.name)
-    console.error("Mensaje:", error.message)
-    console.error("Stack:", error.stack)
-    console.error("Código:", error.code)
-    console.error("Comando:", error.command)
-
-    return { success: false, error: error.message }
+    return { success: true, messageId: data?.id }
+  } catch {
+    return { success: false, error: "Error al enviar email" }
   }
 }
 
