@@ -122,7 +122,7 @@ router.post("/forgot-password", async (req, res) => {
 
     const resetToken = crypto.randomBytes(32).toString("hex")
     user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex")
-    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000 // 1 hour
+    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000 
 
     await user.save()
 
@@ -152,7 +152,6 @@ router.post("/forgot-password", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body
-
     if (!resetToken || !newPassword) {
       return res.status(400).json({ message: "Token y nueva contraseña son requeridos" })
     }
@@ -166,8 +165,8 @@ router.post("/reset-password", async (req, res) => {
 
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() }, // Verifica expiración
     })
+
 
     if (!user) {
       return res.status(400).json({ message: "Token inválido o expirado" })

@@ -15,65 +15,17 @@ import {
 import { useEffect, useState } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useRouter } from "expo-router"
-import Plus from "@/components/ui/plus-symbol"
-import DotsIcon from "@/components/ui/dots-symbol"
+import Plus from "@/components/svg/plus-symbol"
+import DotsIcon from "@/components/svg/dots-symbol"
 import { useTheme } from "@/contexts/ThemeContext"
-import Svg, { Path, Circle } from "react-native-svg"
+
+import ChevronRightIcon from "@/components/svg/chevronRight-symbol"
+import WalletIcon from "@/components/svg/wallet-symbol"
+import SettingsIcon from "@/components/svg/settings-symbol"
+import LogoutIcon from "@/components/svg/logout-symbol"
+import UsersIcon from "@/components/svg/user-symbol"
 
 const ACCENT = "#A855F7"
-
-const ChevronRightIcon = ({ size = 18, color = "#ccc" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M9 18l6-6-6-6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-)
-
-const WalletIcon = ({ size = 22, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M19 7h-1V6a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-8a3 3 0 0 0-3-3zM5 5h10a1 1 0 0 1 1 1v1H5a1 1 0 0 1 0-2zm15 11h-3a2 2 0 0 1 0-4h3v4z"
-      fill={color}
-    />
-  </Svg>
-)
-
-const SettingsIcon = ({ size = 18, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="2" />
-    <Path
-      d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </Svg>
-)
-
-const LogoutIcon = ({ size = 18, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path d="M16 17l5-5-5-5M21 12H9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-)
-
-const UsersIcon = ({ size = 14, color = "#999" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="9" cy="7" r="4" stroke={color} strokeWidth="2" />
-    <Path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke={color} strokeWidth="2" />
-    <Path
-      d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.85"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </Svg>
-)
 
 const CURRENCY_FLAGS: Record<string, string> = {
   EUR: "🇪🇺",

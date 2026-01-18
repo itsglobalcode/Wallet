@@ -15,113 +15,26 @@ import {
 import { useEffect, useState, useRef } from "react"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import Plus from "@/components/ui/plus-symbol"
+import Plus from "@/components/svg/plus-symbol"
 import { useTheme } from "@/contexts/ThemeContext"
 import Svg, { Path, Circle, Defs, LinearGradient, Stop } from "react-native-svg"
-import TrashIcon from "@/components/ui/trash-icon" // Import TrashIcon component
+
+import DotsIcon from "@/components/svg/dots-symbol"
+import ArrowLeftIcon from "@/components/svg/arrow-left"
+import ChevronDownIcon from "@/components/svg/chevronDown-symbol"
+import SwapIcon from "@/components/svg/swap-symbol"
+import GlobeIcon from "@/components/svg/globe-symbol"
+import ShareUserIcon from "@/components/svg/share-user-symbol"
+import SettingsIcon from "@/components/svg/settings-symbol"
+import TrashIcon from "@/components/svg/trash-icon"
 
 const USERS_API = "http://localhost:3000/api/search"
 const WALLET_API = "http://localhost:3000/api/wallet"
-const CURRENCY_API_KEY = "2e2ad80d158c4b9d96b5640f3fa1a4ad"
-const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${CURRENCY_API_KEY}`
+const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_CURRENCY_API_KEY}`
 
 type Tab = "movimientos" | "saldos" | "conversor"
 
 const ACCENT = "#A855F7"
-
-const ArrowLeftIcon = ({ size = 22, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M19 12H5M12 19l-7-7 7-7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-)
-
-const DotsIcon = ({ size = 20, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="5" r="1.5" fill={color} />
-    <Circle cx="12" cy="12" r="1.5" fill={color} />
-    <Circle cx="12" cy="19" r="1.5" fill={color} />
-  </Svg>
-)
-
-const ShareUserIcon = ({ size = 24 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Defs>
-      <LinearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <Stop offset="0%" stopColor="#A855F7" />
-        <Stop offset="100%" stopColor="#7C3AED" />
-      </LinearGradient>
-    </Defs>
-    <Circle cx="9" cy="7" r="3.5" stroke="url(#neonGrad)" strokeWidth="1.8" />
-    <Path
-      d="M3 20v-1.5a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5V20"
-      stroke="url(#neonGrad)"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <Circle cx="18" cy="8" r="3" stroke="url(#neonGrad)" strokeWidth="1.8" strokeOpacity="0.7" />
-    <Path d="M18 5v6M15 8h6" stroke="url(#neonGrad)" strokeWidth="1.8" strokeLinecap="round" />
-  </Svg>
-)
-
-const SettingsIcon = ({ size = 18, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="2" />
-    <Path
-      d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </Svg>
-)
-
-const LogoutIcon = ({ size = 18, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path d="M16 17l5-5-5-5M21 12H9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-)
-
-const GlobeIcon = ({ size = 18, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
-    <Path
-      d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-      stroke={color}
-      strokeWidth="2"
-    />
-  </Svg>
-)
-
-const SwapIcon = ({ size = 16, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M7 10l5-5 5 5M7 14l5 5 5-5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-)
-
-const PlaneIcon = ({ size = 16, color = "#000" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-)
-
-const ChevronDownIcon = ({ size = 16, color = "#999" }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M6 9l6 6 6-6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-)
 
 const CURRENCIES = [
   { code: "USD", name: "Dólar", flag: "🇺🇸" },
@@ -542,7 +455,7 @@ export default function WalletDetailScreen() {
         </TouchableOpacity>
         <View style={styles.headerActions}>
           <TouchableOpacity style={[styles.shareBtn]} onPress={() => setShowAddFriendModal(true)}>
-            <ShareUserIcon size={26} />
+            <ShareUserIcon size={26} color={ACCENT}/>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.headerBtn, { backgroundColor: colors.surface }]}

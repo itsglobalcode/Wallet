@@ -55,14 +55,9 @@ export default function AuthResetPasswordScreen() {
       const data = await response.json()
 
       if (response.ok) {
-        Alert.alert("Éxito", "Contraseña restablecida correctamente", [
-          {
-            text: "OK",
-            onPress: () => router.replace("/(auth)/login" as any),
-          },
-        ])
+        router.replace("/(auth)/login" as any)
       } else {
-        Alert.alert("Error", data.message || "Error al restablecer contraseña")
+        Alert.alert("Error", "Error al restablecer contraseña")
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo conectar con el servidor")

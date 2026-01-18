@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { View, ActivityIndicator } from "react-native"
+import { View, ActivityIndicator, Linking } from "react-native"
 
 export default function Index() {
     const router = useRouter()
@@ -14,9 +14,16 @@ export default function Index() {
 
     const checkAuthStatus = async () => {
         try {
+
+            const initialUrl = await Linking.getInitialURL();
+
+            if (initialUrl?.includes("reset-password")) {
+                return; 
+            }
+
             const userId = await AsyncStorage.getItem("userId")
             const isVerified = await AsyncStorage.getItem("isVerified")
-            console.log(userId, isVerified)
+
             if (userId && isVerified === "true") {
                 router.replace("/(tabs)")
             } else {
@@ -24,7 +31,6 @@ export default function Index() {
             }
         } catch (error) {
             console.error("Error verificando autenticación:", error)
-            // En caso de error, ir a login
             router.replace("/(auth)/login")
         }
     }
