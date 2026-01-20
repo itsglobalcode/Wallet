@@ -23,7 +23,8 @@ import ArrowLeftIcon from "@/components/svg/arrow-left"
 import ChevronDownIcon from "@/components/svg/chevronDown-symbol"
 import SettingsIcon from "@/components/svg/settings-symbol"
 
-const API = "http://localhost:3000/api/wallet"
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API = `${API_URL}/api/wallet`
 const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_CURRENCY_API_KEY}`
 
 type MovementType = "expense" | "income" | "transfer"

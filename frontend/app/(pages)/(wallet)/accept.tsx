@@ -12,8 +12,8 @@ import { useEffect, useState } from "react"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
-
-const API_URL = "http://localhost:3000/api/wallet"
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+const WALLET_API = `${API_URL}/api/wallet`
 
 export default function AcceptInvite() {
     const { id, token } = useLocalSearchParams<{ id: string; token: string }>()

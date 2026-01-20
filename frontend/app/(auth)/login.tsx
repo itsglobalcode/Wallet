@@ -16,6 +16,8 @@ import {
 import { Link, router } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -29,7 +31,7 @@ export default function LoginScreen() {
 
     setLoading(true)
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

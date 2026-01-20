@@ -13,6 +13,8 @@ import InfoIcon from "@/components/svg/info-symbol"
 
 const ACCENT = "#A855F7"
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+
 export default function UserSettingsScreen() {
     const { colors, isDark, toggleTheme } = useTheme()
     const router = useRouter()
