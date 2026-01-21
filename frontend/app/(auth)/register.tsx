@@ -15,6 +15,7 @@ import {
 } from "react-native"
 import { Link, router } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
 export default function RegisterScreen() {
   const [name, setName] = useState("")
@@ -22,6 +23,8 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
@@ -59,7 +62,14 @@ export default function RegisterScreen() {
         Alert.alert("Éxito", "Cuenta creada correctamente")
         router.replace("/(tabs)")
       } else {
-        Alert.alert("Error", data.message || "Error al crear la cuenta")
+        // Mostrar mensajes específicos según el error
+        if (response.status === 409 || data.message?.includes("ya existe") || data.message?.includes("already exists")) {
+          Alert.alert("Error", "Este email ya está registrado")
+        } else if (data.message?.includes("formato")) {
+          Alert.alert("Error", "Email con formato inválido")
+        } else {
+          Alert.alert("Error", data.message || "Error al crear la cuenta")
+        }
       }
     } catch {
       Alert.alert("Error", "No se pudo conectar con el servidor")
@@ -101,23 +111,47 @@ export default function RegisterScreen() {
                 keyboardType="email-address"
               />
 
-              <TextInput
-                style={styles.input}
-                placeholder="Contraseña"
-                placeholderTextColor="#666"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Contraseña"
+                  placeholderTextColor="#666"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOffSymbol size={20} color="#666" />
+                  ) : (
+                    <EyeSymbol size={20} color="#666" />
+                  )}
+                </TouchableOpacity>
+              </View>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Confirmar contraseña"
-                placeholderTextColor="#666"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Confirmar contraseña"
+                  placeholderTextColor="#666"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOffSymbol size={20} color="#666" />
+                  ) : (
+                    <EyeSymbol size={20} color="#666" />
+                  )}
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
                 <Text style={styles.buttonText}>{loading ? "Cargando..." : "Crear cuenta"}</Text>
@@ -188,6 +222,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#111",
     color: "#fff",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 56,
+    borderWidth: 1,
+    borderColor: "#222",
+    borderRadius: 14,
+    marginBottom: 14,
+    backgroundColor: "#111",
+    paddingRight: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    height: "100%",
+    paddingHorizontal: 18,
+    fontSize: 16,
+    color: "#fff",
+  },
+  eyeButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     backgroundColor: "#A855F7",

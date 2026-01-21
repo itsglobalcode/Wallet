@@ -15,13 +15,15 @@ import {
 } from "react-native"
 import { Link, router } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = "http://localhost:3000"
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -49,7 +51,14 @@ export default function LoginScreen() {
         Alert.alert("Éxito", "Inicio de sesión exitoso")
         router.replace("/(tabs)")
       } else {
-        Alert.alert("Error", data.message || "Error al iniciar sesión")
+        // Mostrar mensajes específicos según el error
+        if (response.status === 401) {
+          Alert.alert("Error", "Contraseña incorrecta")
+        } else if (response.status === 404) {
+          Alert.alert("Error", "Usuario no encontrado")
+        } else {
+          Alert.alert("Error", data.message || "Error al iniciar sesión")
+        }
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo conectar con el servidor")
@@ -83,14 +92,26 @@ export default function LoginScreen() {
                 keyboardType="email-address"
               />
 
-              <TextInput
-                style={styles.input}
-                placeholder="Contraseña"
-                placeholderTextColor="#666"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Contraseña"
+                  placeholderTextColor="#666"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOffSymbol size={20} color="#666" />
+                  ) : (
+                    <EyeSymbol size={20} color="#666" />
+                  )}
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
                 <Text style={styles.buttonText}>{loading ? "Cargando..." : "Iniciar Sesión"}</Text>
@@ -167,6 +188,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#111",
     color: "#fff",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 56,
+    borderWidth: 1,
+    borderColor: "#222",
+    borderRadius: 14,
+    marginBottom: 14,
+    backgroundColor: "#111",
+    paddingRight: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    height: "100%",
+    paddingHorizontal: 18,
+    fontSize: 16,
+    color: "#fff",
+  },
+  eyeButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     backgroundColor: "#A855F7",

@@ -44,6 +44,21 @@ const CURRENCIES = [
     { code: "NOK", name: "Corona NO", flag: "🇳🇴" },
     { code: "NZD", name: "Dólar NZ", flag: "🇳🇿" },
     { code: "ZAR", name: "Rand", flag: "🇿🇦" },
+    { code: "RUB", name: "Rublo", flag: "🇷🇺" },
+    { code: "TRY", name: "Lira", flag: "🇹🇷" },
+    { code: "AED", name: "Dirham", flag: "🇦🇪" },
+    { code: "THB", name: "Baht", flag: "🇹🇭" },
+    { code: "DKK", name: "Corona DK", flag: "🇩🇰" },
+    { code: "PLN", name: "Zloty", flag: "🇵🇱" },
+    { code: "CZK", name: "Corona CZ", flag: "🇨🇿" },
+    { code: "ILS", name: "Séquel", flag: "🇮🇱" },
+    { code: "CLP", name: "Peso CL", flag: "🇨🇱" },
+    { code: "ARS", name: "Peso AR", flag: "🇦🇷" },
+    { code: "COP", name: "Peso CO", flag: "🇨🇴" },
+    { code: "PHP", name: "Peso PH", flag: "🇵🇭" },
+    { code: "MYR", name: "Ringgit", flag: "🇲🇾" },
+    { code: "IDR", name: "Rupia ID", flag: "🇮🇩" },
+    { code: "VND", name: "Dong", flag: "🇻🇳" },
 ]
 
 export default function CurrencyExchangeScreen() {

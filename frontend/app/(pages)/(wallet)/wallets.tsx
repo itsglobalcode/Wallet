@@ -18,6 +18,7 @@ import { useRouter } from "expo-router"
 import Plus from "@/components/svg/plus-symbol"
 import DotsIcon from "@/components/svg/dots-symbol"
 import { useTheme } from "@/contexts/ThemeContext"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 import EmojiHubPicker from "@/components/emoji-select"
 
@@ -41,6 +42,28 @@ const CURRENCY_FLAGS: Record<string, string> = {
     CNY: "🇨🇳",
     MXN: "🇲🇽",
     BRL: "🇧🇷",
+    INR: "🇮🇳",
+    KRW: "🇰🇷",
+    SGD: "🇸🇬",
+    HKD: "🇭🇰",
+    SEK: "🇸🇪",
+    NOK: "🇳🇴",
+    ZAR: "🇿🇦",
+    RUB: "🇷🇺",
+    TRY: "🇹🇷",
+    AED: "🇦🇪",
+    THB: "🇹🇭",
+    DKK: "🇩🇰",
+    PLN: "🇵🇱",
+    CZK: "🇨🇿",
+    ILS: "🇮🇱",
+    CLP: "🇨🇱",
+    ARS: "🇦🇷",
+    COP: "🇨🇴",
+    PHP: "🇵🇭",
+    MYR: "🇲🇾",
+    IDR: "🇮🇩",
+    VND: "🇻🇳",
 }
 
 const getFlag = (currency: string) => {
@@ -50,6 +73,7 @@ const getFlag = (currency: string) => {
 
 export default function WalletsScreen() {
     const { colors } = useTheme()
+    const { t } = useLanguage()
     const [wallets, setWallets] = useState<any[]>([])
     const [createWalletVisible, setCreateWalletVisible] = useState(false)
     const [currencyModalVisible, setCurrencyModalVisible] = useState(false)
@@ -78,7 +102,7 @@ export default function WalletsScreen() {
 
     const addWallet = async () => {
         if (!name.trim()) {
-            Alert.alert("Error", "El nombre es obligatorio")
+            Alert.alert(t("errorTitle"), t("nameRequired"))
             return
         }
         try {
@@ -97,7 +121,7 @@ export default function WalletsScreen() {
             setCreateWalletVisible(false)
             await loadWallets()
         } catch (error: any) {
-            Alert.alert("Error", error.message || "No se pudo crear la wallet")
+            Alert.alert(t("errorTitle"), error.message || t("couldNotCreate"))
         }
     }
 
@@ -119,9 +143,9 @@ export default function WalletsScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
                 <View style={styles.headerTitleWrapper}>
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Wallets</Text>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>{t("wallets")}</Text>
                     <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                        {wallets.length} {wallets.length === 1 ? "cuenta" : "cuentas"}
+                        {wallets.length} {wallets.length === 1 ? t("account") : t("accounts")}
                     </Text>
                 </View>
                 <TouchableOpacity
@@ -170,8 +194,8 @@ export default function WalletsScreen() {
                 ListEmptyComponent={
                     <View style={styles.emptyState}>
                         <WalletIcon size={40} color={colors.textTertiary} />
-                        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Sin wallets</Text>
-                        <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>Toca + para crear una</Text>
+                        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{t("noWallets")}</Text>
+                        <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>{t("tapToCreate")}</Text>
                     </View>
                 }
             />
@@ -188,9 +212,9 @@ export default function WalletsScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>Nueva Wallet</Text>
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>{t("newWallet")}</Text>
 
-                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Nombre</Text>
+                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t("name")}</Text>
                         <View style={styles.emojiContainer}>
 
                             <TouchableOpacity onPress={() => setOpen(true)}>
@@ -205,7 +229,7 @@ export default function WalletsScreen() {
                                 }}
                             />
                             <TextInput
-                                placeholder="Ej: Gastos mensuales"
+                                placeholder={t("exampleName")}
                                 placeholderTextColor={colors.textTertiary}
                                 value={name}
                                 onChangeText={setName}
@@ -224,7 +248,7 @@ export default function WalletsScreen() {
                         </View>
 
 
-                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Moneda</Text>
+                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t("currency")}</Text>
                         <TouchableOpacity
                             style={[styles.selector, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}
                             onPress={() => setCurrencyModalVisible(true)}
@@ -235,15 +259,15 @@ export default function WalletsScreen() {
                         </TouchableOpacity>
 
                         <Text style={[styles.hintText, { color: colors.textTertiary }]}>
-                            Puedes compartir la wallet con otros usuarios usando el icono de compartir
+                            {t("shareHint")}
                         </Text>
 
                         <View style={styles.modalActions}>
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setCreateWalletVisible(false)}>
-                                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
+                                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>{t("cancel")}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: ACCENT }]} onPress={addWallet}>
-                                <Text style={styles.confirmBtnText}>Crear</Text>
+                                <Text style={styles.confirmBtnText}>{t("create")}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -255,7 +279,7 @@ export default function WalletsScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda</Text>
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>{t("currency")}</Text>
                         <ScrollView style={styles.currencyList} showsVerticalScrollIndicator={false}>
                             {Object.entries(CURRENCY_FLAGS).map(([code, flag]) => (
                                 <TouchableOpacity
@@ -273,7 +297,7 @@ export default function WalletsScreen() {
                             ))}
                         </ScrollView>
                         <TouchableOpacity style={styles.cancelBtn} onPress={() => setCurrencyModalVisible(false)}>
-                            <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cerrar</Text>
+                            <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>{t("close")}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -283,11 +307,11 @@ export default function WalletsScreen() {
                 <View style={[styles.optionsMenu, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
                     <TouchableOpacity style={styles.optionItem} onPress={handleSettings}>
                         <SettingsIcon size={18} color={colors.text} />
-                        <Text style={[styles.optionText, { color: colors.text }]}>Configuración</Text>
+                        <Text style={[styles.optionText, { color: colors.text }]}>{t("configuration")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.optionItem} onPress={handleLogout}>
                         <LogoutIcon size={18} color="#C62828" />
-                        <Text style={[styles.optionText, { color: "#C62828" }]}>Cerrar sesión</Text>
+                        <Text style={[styles.optionText, { color: "#C62828" }]}>{t("closeSession")}</Text>
                     </TouchableOpacity>
                 </View>
             )}

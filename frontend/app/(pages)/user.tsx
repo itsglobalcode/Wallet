@@ -3,6 +3,7 @@
 import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet, ScrollView, Switch } from "react-native"
 import { useRouter } from "expo-router"
 import { useTheme } from "@/contexts/ThemeContext"
+import { useLanguage } from "@/contexts/LanguageContext"
 import { useEffect, useState } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
@@ -10,6 +11,7 @@ import ArrowLeft from "@/components/svg/arrow-left"
 import MoonIcon from "@/components/svg/moon-symbol"
 import SunIcon from "@/components/svg/sun-symbol"
 import InfoIcon from "@/components/svg/info-symbol"
+import GlobeIcon from "@/components/svg/globe-symbol"
 
 const ACCENT = "#A855F7"
 
@@ -17,6 +19,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 export default function UserSettingsScreen() {
     const { colors, isDark, toggleTheme } = useTheme()
+    const { language, setLanguage, t } = useLanguage()
     const router = useRouter()
     const [userName, setUserName] = useState("Usuario")
 
@@ -38,37 +41,37 @@ export default function UserSettingsScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={[styles.headerBtn, { backgroundColor: colors.surface }]}>
                     <ArrowLeft color={colors.text} />
                 </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>Configuración</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>{t("settings")}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 {/* User Info Section */}
                 <View style={[styles.section, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Perfil</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{t("profile")}</Text>
                     <View style={styles.userCard}>
                         <View style={styles.userAvatar}>
                             <Text style={styles.avatarText}>{userName?.charAt(0).toUpperCase()}</Text>
                         </View>
                         <View style={styles.userInfo}>
                             <Text style={[styles.userName, { color: colors.text }]}>{userName}</Text>
-                            <Text style={[styles.userEmail, { color: colors.textTertiary }]}>NeonWallet User</Text>
+                            <Text style={[styles.userEmail, { color: colors.textTertiary }]}>{t("neonWalletUser")}</Text>
                         </View>
                     </View>
                 </View>
 
                 {/* Theme Settings */}
                 <View style={[styles.section, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Apariencia</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{t("appearance")}</Text>
                     <View style={styles.settingItem}>
                         <View style={styles.settingLeft}>
                             {isDark ? <MoonIcon size={20} color={ACCENT} /> : <SunIcon size={20} color={ACCENT} />}
                             <View style={styles.settingTextWrapper}>
                                 <Text style={[styles.settingLabel, { color: colors.text }]}>
-                                    {isDark ? "Tema Oscuro" : "Tema Claro"}
+                                    {isDark ? t("darkTheme") : t("lightTheme")}
                                 </Text>
                                 <Text style={[styles.settingDescription, { color: colors.textTertiary }]}>
-                                    {isDark ? "Modo oscuro activado" : "Modo claro activado"}
+                                    {isDark ? t("darkModeActive") : t("lightModeActive")}
                                 </Text>
                             </View>
                         </View>
@@ -81,39 +84,87 @@ export default function UserSettingsScreen() {
                     </View>
                 </View>
 
+                {/* Language Settings */}
+                <View style={[styles.section, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{t("language")}</Text>
+                    <View style={styles.languageSelector}>
+                        <View style={styles.languageHeader}>
+                            <GlobeIcon size={20} color={ACCENT} />
+                            <Text style={[styles.languageLabel, { color: colors.text }]}>{t("selectLanguage")}</Text>
+                        </View>
+                        <View style={styles.languageButtons}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.languageButton,
+                                    { 
+                                        backgroundColor: language === "es" ? ACCENT : colors.surface,
+                                        borderColor: language === "es" ? ACCENT : colors.surfaceBorder,
+                                    }
+                                ]}
+                                onPress={() => setLanguage("es")}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.languageFlag}>🇪🇸</Text>
+                                <Text style={[
+                                    styles.languageText,
+                                    { color: language === "es" ? "#fff" : colors.text }
+                                ]}>
+                                    {t("spanish")}
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.languageButton,
+                                    { 
+                                        backgroundColor: language === "en" ? ACCENT : colors.surface,
+                                        borderColor: language === "en" ? ACCENT : colors.surfaceBorder,
+                                    }
+                                ]}
+                                onPress={() => setLanguage("en")}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.languageFlag}>🇬🇧</Text>
+                                <Text style={[
+                                    styles.languageText,
+                                    { color: language === "en" ? "#fff" : colors.text }
+                                ]}>
+                                    {t("english")}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+
                 {/* App Info */}
                 <View style={[styles.section, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Acerca de</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{t("about")}</Text>
                     <View style={[styles.infoBox, { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]}>
                         <InfoIcon size={20} color={ACCENT} />
                         <View style={styles.infoContent}>
                             <Text style={[styles.infoBrand, { color: colors.text }]}>NeonWallet</Text>
                             <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-                                Tu solución de billetera digital moderna con funcionalidades avanzadas para gestionar tus finanzas.
+                                {t("neonWalletDescription")}
                             </Text>
-                            <Text style={[styles.infoPowered, { color: ACCENT }]}>Powered by Nomad</Text>
+                            <Text style={[styles.infoPowered, { color: ACCENT }]}>{t("poweredBy")}</Text>
                         </View>
                     </View>
                 </View>
 
                 {/* Nomad Info */}
                 <View style={[styles.nomadSection, { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]}>
-                    <Text style={[styles.nomadTitle, { color: colors.text }]}>Sobre Nomad</Text>
+                    <Text style={[styles.nomadTitle, { color: colors.text }]}>{t("aboutNomad")}</Text>
                     <Text style={[styles.nomadText, { color: colors.textSecondary }]}>
-                        Nomad es una plataforma innovadora diseñada para viajeros y personas que manejan múltiples monedas. Con
-                        herramientas de gestión de gastos inteligentes, conversión de monedas en tiempo real y wallets compartidas,
-                        Nomad te ayuda a mantener un control total de tus finanzas dondequiera que estés.
+                        {t("nomadDescription")}
                     </Text>
                     <Text style={[styles.nomadFeatures, { color: colors.text }]}>
-                        ✓ Gestión de múltiples wallets{"\n"}✓ Conversión de monedas en tiempo real{"\n"}✓ Wallets compartidas{"\n"}✓
-                        Seguimiento de gastos detallado{"\n"}✓ Interfaz intuitiva y moderna
+                        {t("nomadFeatures")}
                     </Text>
                 </View>
 
                 {/* Version Info */}
                 <View style={styles.versionBox}>
-                    <Text style={[styles.versionText, { color: colors.textTertiary }]}>NeonWallet v1.0.0</Text>
-                    <Text style={[styles.versionSubtext, { color: colors.textTertiary }]}>© 2026 Powered by Nomad</Text>
+                    <Text style={[styles.versionText, { color: colors.textTertiary }]}>{t("version")}</Text>
+                    <Text style={[styles.versionSubtext, { color: colors.textTertiary }]}>{t("copyright")}</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -211,6 +262,41 @@ const styles = StyleSheet.create({
     },
     settingDescription: {
         fontSize: 13,
+    },
+    languageSelector: {
+        gap: 12,
+    },
+    languageHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingVertical: 4,
+    },
+    languageLabel: {
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    languageButtons: {
+        flexDirection: "row",
+        gap: 12,
+    },
+    languageButton: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        borderWidth: 2,
+    },
+    languageFlag: {
+        fontSize: 20,
+    },
+    languageText: {
+        fontSize: 15,
+        fontWeight: "600",
     },
     infoBox: {
         flexDirection: "row",

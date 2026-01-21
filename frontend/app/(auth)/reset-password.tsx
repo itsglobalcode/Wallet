@@ -14,12 +14,15 @@ import {
   Text,
 } from "react-native"
 import { router, useLocalSearchParams } from "expo-router"
+import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
 export default function AuthResetPasswordScreen() {
   const { token } = useLocalSearchParams()
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleResetPassword = async () => {
     if (!token) {
@@ -85,23 +88,47 @@ export default function AuthResetPasswordScreen() {
 
               <Text style={styles.description}>Ingresa tu nueva contraseña para acceder a tu cuenta.</Text>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Nueva contraseña"
-                placeholderTextColor="#666"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Nueva contraseña"
+                  placeholderTextColor="#666"
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOffSymbol size={20} color="#666" />
+                  ) : (
+                    <EyeSymbol size={20} color="#666" />
+                  )}
+                </TouchableOpacity>
+              </View>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Confirmar nueva contraseña"
-                placeholderTextColor="#666"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Confirmar nueva contraseña"
+                  placeholderTextColor="#666"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOffSymbol size={20} color="#666" />
+                  ) : (
+                    <EyeSymbol size={20} color="#666" />
+                  )}
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={loading}>
                 <Text style={styles.buttonText}>{loading ? "Guardando..." : "Restablecer Contraseña"}</Text>
@@ -182,6 +209,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#111",
     color: "#fff",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 56,
+    borderWidth: 1,
+    borderColor: "#222",
+    borderRadius: 14,
+    marginBottom: 14,
+    backgroundColor: "#111",
+    paddingRight: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    height: "100%",
+    paddingHorizontal: 18,
+    fontSize: 16,
+    color: "#fff",
+  },
+  eyeButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     backgroundColor: "#A855F7",

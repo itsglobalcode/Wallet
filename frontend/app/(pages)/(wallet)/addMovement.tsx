@@ -22,6 +22,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import ArrowLeftIcon from "@/components/svg/arrow-left"
 import ChevronDownIcon from "@/components/svg/chevronDown-symbol"
 import SettingsIcon from "@/components/svg/settings-symbol"
+import ShareUserIcon from "@/components/svg/share-user-symbol"
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL
 const API = `${API_URL}/api/wallet`
@@ -84,6 +85,21 @@ const CURRENCIES = [
     { code: "NOK", name: "Corona NO", flag: "🇳🇴" },
     { code: "NZD", name: "Dólar NZ", flag: "🇳🇿" },
     { code: "ZAR", name: "Rand", flag: "🇿🇦" },
+    { code: "RUB", name: "Rublo", flag: "🇷🇺" },
+    { code: "TRY", name: "Lira", flag: "🇹🇷" },
+    { code: "AED", name: "Dirham", flag: "🇦🇪" },
+    { code: "THB", name: "Baht", flag: "🇹🇭" },
+    { code: "DKK", name: "Corona DK", flag: "🇩🇰" },
+    { code: "PLN", name: "Zloty", flag: "🇵🇱" },
+    { code: "CZK", name: "Corona CZ", flag: "🇨🇿" },
+    { code: "ILS", name: "Séquel", flag: "🇮🇱" },
+    { code: "CLP", name: "Peso CL", flag: "🇨🇱" },
+    { code: "ARS", name: "Peso AR", flag: "🇦🇷" },
+    { code: "COP", name: "Peso CO", flag: "🇨🇴" },
+    { code: "PHP", name: "Peso PH", flag: "🇵🇭" },
+    { code: "MYR", name: "Ringgit", flag: "🇲🇾" },
+    { code: "IDR", name: "Rupia ID", flag: "🇮🇩" },
+    { code: "VND", name: "Dong", flag: "🇻🇳" },
 ]
 
 const getCategoryIcon = (category: any): string => {
@@ -123,6 +139,10 @@ export default function AddMovementScreen() {
     const [userModalVisible, setUserModalVisible] = useState(false)
     const [toUserModalVisible, setToUserModalVisible] = useState(false)
     const [currencyModalVisible, setCurrencyModalVisible] = useState(false)
+    const [splitModalVisible, setSplitModalVisible] = useState(false)
+    const [splitData, setSplitData] = useState<Record<string, number> | null>(null)
+
+    const [userAmounts, setUserAmounts] = useState<Record<string, string>>({})
 
     useEffect(() => {
         if (!id) return
@@ -150,6 +170,14 @@ export default function AddMovementScreen() {
             setExchangeRate(null)
         }
     }, [amount, expenseCurrency, walletCurrency, rates])
+
+    useEffect(() => {
+        const initialAmounts = users.reduce((acc, user) => {
+            acc[user._id] = splitData?.[user._id]?.toString() || "0"
+            return acc
+        }, {} as Record<string, string>)
+        setUserAmounts(initialAmounts)
+    }, [users, splitData])
 
     const fetchRates = async () => {
         try {
@@ -193,6 +221,11 @@ export default function AddMovementScreen() {
         }
     }
 
+    const handleSplitConfirm = (splits: Record<string, number>) => {
+        setSplitData(splits)
+        setSplitModalVisible(false)
+    }
+
     const handleCreateMovement = async () => {
         if (!amount) return Alert.alert("Error", "Ingresa una cantidad")
         if (type !== "transfer" && !category) return Alert.alert("Error", "Selecciona una categoría")
@@ -208,6 +241,72 @@ export default function AddMovementScreen() {
 
             if (expenseCurrency !== walletCurrency && convertedAmount) {
                 finalAmount = convertedAmount
+            }
+
+            // Si hay división de gastos (splitData), crear múltiples movimientos
+            if (splitData && type === "expense" && users.length > 1) {
+                const payerId = selectedUser._id
+                const paidAmount = finalAmount
+
+                // Crear el movimiento de gasto del usuario que pagó
+                await fetch(`${API}/movements`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        wallet: id,
+                        user: payerId,
+                        type: "expense",
+                        amount: paidAmount,
+                        category: category._id,
+                        notes: notes + " (dividido)",
+                        tags: [],
+                        date: new Date(),
+                    }),
+                })
+
+                // Crear transferencias de cada usuario hacia el que pagó (excepto el mismo)
+                for (const [userId, userAmount] of Object.entries(splitData)) {
+                    if (userId !== payerId && userAmount > 0) {
+                        const userName = users.find((u) => u._id === userId)?.name || "Usuario"
+                        const payerName = selectedUser.name
+
+                        // Movimiento de "pago" del deudor al pagador
+                        await fetch(`${API}/movements`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                wallet: id,
+                                user: userId,
+                                type: "expense",
+                                amount: userAmount,
+                                category: null,
+                                notes: `→ ${payerName} (parte de: ${notes || category.name})`,
+                                tags: [],
+                                date: new Date(),
+                            }),
+                        })
+
+                        // Movimiento de "cobro" del pagador
+                        await fetch(`${API}/movements`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                wallet: id,
+                                user: payerId,
+                                type: "income",
+                                amount: userAmount,
+                                category: null,
+                                notes: `← ${userName} (parte de: ${notes || category.name})`,
+                                tags: [],
+                                date: new Date(),
+                            }),
+                        })
+                    }
+                }
+
+                Alert.alert("Listo", "Gasto dividido creado correctamente")
+                router.push(`/wallet?id=${id}`)
+                return
             }
 
             if (type === "transfer") {
@@ -428,6 +527,25 @@ export default function AddMovementScreen() {
                         />
                     </View>
 
+                    {/* Split Expense Button (only for shared wallets with expenses) */}
+                    {type === "expense" && users.length > 1 && (
+                        <TouchableOpacity
+                            style={[styles.splitBtn, { backgroundColor: colors.surface, borderColor: splitData ? ACCENT : colors.surfaceBorder }]}
+                            onPress={() => {
+                                if (!amount) {
+                                    Alert.alert("Error", "Ingresa un monto primero")
+                                    return
+                                }
+                                setSplitModalVisible(true)
+                            }}
+                        >
+                            <ShareUserIcon size={20} color={splitData ? ACCENT : colors.textSecondary} />
+                            <Text style={[styles.splitBtnText, { color: splitData ? ACCENT : colors.textSecondary }]}>
+                                {splitData ? "Gasto dividido configurado" : "Dividir gasto entre usuarios"}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+
                     <TouchableOpacity style={[styles.submitBtn, { backgroundColor: ACCENT }]} onPress={handleCreateMovement}>
                         <Text style={styles.submitBtnText}>
                             {type === "transfer" ? "Transferir" : type === "expense" ? "Añadir gasto" : "Añadir ingreso"}
@@ -558,6 +676,110 @@ export default function AddMovementScreen() {
                     </View>
                 </View>
             </Modal>
+
+            {/* Split Expense Modal */}
+            <Modal visible={splitModalVisible} transparent animationType="slide">
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
+                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>Dividir gasto</Text>
+                        <Text style={[styles.splitSubtitle, { color: colors.textSecondary }]}>
+                            Total: {amount} {expenseCurrency}
+                        </Text>
+                        
+                        <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+                            {users.map((u) => (
+                                <View key={u._id} style={[styles.splitUserItem, { backgroundColor: colors.surface }]}>
+                                    <View style={styles.splitUserLeft}>
+                                        <View style={[styles.userAvatar, { backgroundColor: colors.cardBackground }]}>
+                                            <Text style={[styles.userAvatarText, { color: colors.text }]}>
+                                                {u.name?.charAt(0) || "?"}
+                                            </Text>
+                                        </View>
+                                        <Text style={[styles.splitUserName, { color: colors.text }]}>{u.name}</Text>
+                                    </View>
+                                    <View style={styles.splitAmountInput}>
+                                        <TextInput
+                                            style={[styles.splitInput, { 
+                                                backgroundColor: colors.cardBackground, 
+                                                color: colors.text,
+                                                borderColor: colors.surfaceBorder 
+                                            }]}
+                                            value={userAmounts[u._id]}
+                                            onChangeText={(val) => {
+                                                setUserAmounts({ ...userAmounts, [u._id]: val })
+                                              const newSplitData = { ...splitData }
+                                                newSplitData[u._id] = Number.parseFloat(val) || 0
+                                                setSplitData(newSplitData)
+                                            }}
+                                            keyboardType="numeric"
+                                            placeholder="0"
+                                            placeholderTextColor={colors.textTertiary}
+                                        />
+                                        <Text style={[styles.splitCurrency, { color: colors.textSecondary }]}>
+                                            {expenseCurrency}
+                                        </Text>
+                                    </View>
+                                </View>
+                            ))}
+
+                            {splitData && (() => {
+                                const totalSplit = Object.values(splitData).reduce((sum, val) => sum + (val || 0), 0)
+                                const remaining = Number.parseFloat(amount) - totalSplit
+                                const isValid = Math.abs(remaining) < 0.01 // Tolerancia para decimales
+                                
+                                return (
+                                    <View style={[
+                                        styles.splitSummary,
+                                        { 
+                                            backgroundColor: isValid ? `${ACCENT}10` : "#FFE5E5",
+                                            borderColor: isValid ? `${ACCENT}30` : "#FF6B6B"
+                                        }
+                                    ]}>
+                                        <Text style={[styles.splitSummaryLabel, { color: colors.textSecondary }]}>
+                                            {isValid ? "✓ Suma correcta" : "⚠ Falta asignar"}
+                                        </Text>
+                                        {!isValid && (
+                                            <Text style={[styles.splitRemaining, { color: "#FF6B6B" }]}>
+                                                {remaining.toFixed(2)} {expenseCurrency}
+                                            </Text>
+                                        )}
+                                    </View>
+                                )
+                            })()}
+                        </ScrollView>
+
+                        <View style={styles.splitActions}>
+                            <TouchableOpacity 
+                                style={[styles.splitActionBtn, { backgroundColor: colors.surface }]} 
+                                onPress={() => {
+                                    setSplitData(null)
+                                    setSplitModalVisible(false)
+                                }}
+                            >
+                                <Text style={[styles.splitActionText, { color: colors.textSecondary }]}>Cancelar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={[styles.splitActionBtn, { backgroundColor: ACCENT }]}
+                                onPress={() => {
+                                    if (splitData) {
+                                        const totalSplit = Object.values(splitData).reduce((sum, val) => sum + (val || 0), 0)
+                                        const remaining = Number.parseFloat(amount) - totalSplit
+                                        
+                                        if (Math.abs(remaining) >= 0.01) {
+                                            Alert.alert("Error", "La suma no coincide con el total")
+                                            return
+                                        }
+                                    }
+                                    setSplitModalVisible(false)
+                                }}
+                            >
+                                <Text style={[styles.splitActionText, { color: "#fff" }]}>Confirmar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     )
 }
@@ -631,6 +853,19 @@ const styles = StyleSheet.create({
 
     notesInput: { borderRadius: 12, padding: 14, fontSize: 16, borderWidth: 1, minHeight: 80, textAlignVertical: "top" },
 
+    splitBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        borderRadius: 14,
+        paddingVertical: 14,
+        marginBottom: 12,
+        marginTop: 12,
+        borderWidth: 2,
+    },
+    splitBtnText: { fontSize: 15, fontWeight: "600" },
+
     submitBtn: { paddingVertical: 18, borderRadius: 14, alignItems: "center", marginTop: 24 },
     submitBtnText: { fontSize: 17, fontWeight: "700", color: "#fff" },
 
@@ -644,4 +879,49 @@ const styles = StyleSheet.create({
     modalClose: { paddingVertical: 16, alignItems: "center", marginTop: 8 },
     modalCloseText: { fontSize: 16, fontWeight: "600" },
     categoryIcon: { fontSize: 22, marginRight: 12 },
+
+    splitSubtitle: { fontSize: 14, marginBottom: 20, textAlign: "center" },
+    splitUserItem: { 
+        flexDirection: "row", 
+        alignItems: "center", 
+        justifyContent: "space-between",
+        padding: 12, 
+        borderRadius: 12, 
+        marginBottom: 8 
+    },
+    splitUserLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
+    splitUserName: { fontSize: 15, fontWeight: "500", marginLeft: 8 },
+    splitAmountInput: { flexDirection: "row", alignItems: "center", gap: 6 },
+    splitInput: { 
+        width: 80, 
+        paddingVertical: 8, 
+        paddingHorizontal: 12, 
+        borderRadius: 8, 
+        fontSize: 16,
+        fontWeight: "600",
+        textAlign: "right",
+        borderWidth: 1
+    },
+    splitCurrency: { fontSize: 14, fontWeight: "500" },
+    splitSummary: {
+        padding: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        marginTop: 12,
+        alignItems: "center",
+    },
+    splitSummaryLabel: { fontSize: 14, fontWeight: "600" },
+    splitRemaining: { fontSize: 16, fontWeight: "700", marginTop: 4 },
+    splitActions: { 
+        flexDirection: "row", 
+        gap: 12, 
+        marginTop: 16 
+    },
+    splitActionBtn: { 
+        flex: 1, 
+        paddingVertical: 14, 
+        borderRadius: 12, 
+        alignItems: "center" 
+    },
+    splitActionText: { fontSize: 16, fontWeight: "600" },
 })
