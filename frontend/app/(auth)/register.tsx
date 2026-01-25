@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -17,6 +16,8 @@ import { Link, router } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+
 export default function RegisterScreen() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -25,26 +26,28 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert("Error", "Por favor completa todos los campos")
+      setErrorMessage("Por favor completa todos los campos")
       return
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Las contraseñas no coinciden")
+      setErrorMessage("Las contraseñas no coinciden")
       return
     }
 
     if (password.length < 6) {
-      Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres")
+      setErrorMessage("La contraseña debe tener al menos 6 caracteres")
       return
     }
 
     setLoading(true)
+    setErrorMessage("")
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,20 +62,19 @@ export default function RegisterScreen() {
         await AsyncStorage.setItem("userEmail", email)
         await AsyncStorage.setItem("userName", name)
         await AsyncStorage.setItem("isVerified", "true")
-        Alert.alert("Éxito", "Cuenta creada correctamente")
         router.replace("/(tabs)")
       } else {
         // Mostrar mensajes específicos según el error
         if (response.status === 409 || data.message?.includes("ya existe") || data.message?.includes("already exists")) {
-          Alert.alert("Error", "Este email ya está registrado")
+          setErrorMessage("Este email ya está registrado")
         } else if (data.message?.includes("formato")) {
-          Alert.alert("Error", "Email con formato inválido")
+          setErrorMessage("Email con formato inválido")
         } else {
-          Alert.alert("Error", data.message || "Error al crear la cuenta")
+          setErrorMessage(data.message || "Error al crear la cuenta")
         }
       }
     } catch {
-      Alert.alert("Error", "No se pudo conectar con el servidor")
+      setErrorMessage("No se pudo conectar con el servidor")
     } finally {
       setLoading(false)
     }
@@ -93,12 +95,21 @@ export default function RegisterScreen() {
                 <Text style={styles.tagline}>powered by Nomad</Text>
               </View>
 
+              {errorMessage ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              ) : null}
+
               <TextInput
                 style={styles.input}
                 placeholder="Nombre completo"
                 placeholderTextColor="#666"
                 value={name}
-                onChangeText={setName}
+                onChangeText={(text) => {
+                  setName(text)
+                  setErrorMessage("")
+                }}
               />
 
               <TextInput
@@ -270,5 +281,19 @@ const styles = StyleSheet.create({
   linkHighlight: {
     color: "#A855F7",
     fontWeight: "600",
+  },
+  errorContainer: {
+    backgroundColor: "#fee",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#fcc",
+  },
+  errorText: {
+    color: "#c00",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
   },
 })

@@ -27,6 +27,7 @@ import GlobeIcon from "@/components/svg/globe-symbol"
 import ShareUserIcon from "@/components/svg/share-user-symbol"
 import SettingsIcon from "@/components/svg/settings-symbol"
 import TrashIcon from "@/components/svg/trash-icon"
+import EmojiHubPicker from "@/components/emoji-select"
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL
 
@@ -92,9 +93,9 @@ export default function WalletDetailScreen() {
     const [showEditModal, setShowEditModal] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [editName, setEditName] = useState("")
-    const [editCurrency, setEditCurrency] = useState("")
-    const [editBudget, setEditBudget] = useState("")
+    const [editIcon, setEditIcon] = useState("")
     const [search, setSearch] = useState("")
+    const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
     const [users, setUsers] = useState<any[]>([])
     const [selectedUser, setSelectedUser] = useState<any | null>(null)
     const [loadingUsers, setLoadingUsers] = useState(false)
@@ -290,8 +291,7 @@ export default function WalletDetailScreen() {
 
     const handleEditWallet = () => {
         setEditName(wallet?.name || "")
-        setEditCurrency(wallet?.currency || "EUR")
-        setEditBudget(wallet?.budget?.toString() || "")
+        setEditIcon(wallet?.icon || "🐯")
         setOptionsVisible(false)
         setShowEditModal(true)
     }
@@ -301,7 +301,7 @@ export default function WalletDetailScreen() {
             await fetch(`${WALLET_API}/edit-wallet`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, name: editName, currency: editCurrency, budget: editBudget }),
+                body: JSON.stringify({ id, name: editName, icon: editIcon }),
             })
         } catch (err) {
             console.error(err)
@@ -381,7 +381,7 @@ export default function WalletDetailScreen() {
                             .map((m) => {
                                 const converted = convertAmount(m.amount, wallet?.currency || "EUR", homeCurrency)
                                 return (
-                                    <View key={m._id} style={[styles.convertedMovementCard, { backgroundColor: colors.surface }]}>
+                                    <View key={m._id} style={[styles.convertedMovementCard, { backgroundColor: colors.surface }]} >
                                         <View style={styles.convertedMovementLeft}>
                                             <Text style={[styles.convertedMovementCategory, { color: colors.text }]}>
                                                 {m.category?.name || "Sin categoría"}
@@ -598,10 +598,7 @@ export default function WalletDetailScreen() {
                             <View style={styles.cardContent}>
                                 <Text style={[styles.cardTitle, { color: colors.text }]}>{item.name}</Text>
                                 <Text
-                                    style={[
-                                        styles.balanceStatusText,
-                                        { color: item.balance < 0 ? "#C62828" : item.balance > 0 ? "#2E7D32" : colors.textTertiary },
-                                    ]}
+                                    style={[styles.balanceStatusText, { color: item.balance < 0 ? "#C62828" : item.balance > 0 ? "#2E7D32" : colors.textTertiary }]}
                                 >
                                     {item.balance < 0
                                         ? `Debe ${Math.abs(item.balance).toFixed(2)} ${wallet?.currency || "€"}`
@@ -665,10 +662,7 @@ export default function WalletDetailScreen() {
                             placeholderTextColor={colors.textTertiary}
                             value={search}
                             onChangeText={searchUsers}
-                            style={[
-                                styles.input,
-                                { backgroundColor: colors.surface, color: colors.text, borderColor: colors.surfaceBorder },
-                            ]}
+                            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.surfaceBorder }]}
                         />
                         {loadingUsers ? (
                             <ActivityIndicator style={{ marginTop: 20 }} color={colors.textTertiary} />
@@ -679,10 +673,7 @@ export default function WalletDetailScreen() {
                                 style={{ maxHeight: 180 }}
                                 renderItem={({ item }) => (
                                     <TouchableOpacity
-                                        style={[
-                                            styles.userItem,
-                                            { backgroundColor: selectedUser?._id === item._id ? `${ACCENT}15` : colors.surface },
-                                        ]}
+                                        style={[styles.userItem, { backgroundColor: selectedUser?._id === item._id ? `${ACCENT}15` : colors.surface }]}
                                         onPress={() => setSelectedUser(item)}
                                     >
                                         <Text style={[styles.userName, { color: colors.text }]}>{item.name}</Text>
@@ -706,73 +697,55 @@ export default function WalletDetailScreen() {
                 </View>
             </Modal>
 
-            {/* Edit Modal */}
-            <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
-                <View style={styles.modalBottomOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>Editar wallet</Text>
-
-                        <Text style={[styles.label, { color: colors.textSecondary }]}>Nombre</Text>
-                        <TextInput
-                            placeholder="Nombre de la wallet"
-                            placeholderTextColor={colors.textTertiary}
-                            value={editName}
-                            onChangeText={setEditName}
-                            style={[
-                                styles.input,
-                                { backgroundColor: colors.surface, color: colors.text, borderColor: colors.surfaceBorder },
-                            ]}
-                        />
-
-                        <Text style={[styles.label, { color: colors.textSecondary }]}>Moneda</Text>
-                        <View
-                            style={[
-                                styles.currencyEditSelector,
-                                { backgroundColor: colors.surface, borderColor: colors.surfaceBorder },
-                            ]}
-                        >
-                            {["EUR", "USD", "GBP", "JPY"].map((curr) => (
-                                <TouchableOpacity
-                                    key={curr}
-                                    style={[styles.currencyOption, editCurrency === curr && { backgroundColor: `${ACCENT}15` }]}
-                                    onPress={() => setEditCurrency(curr)}
-                                >
-                                    <Text style={[styles.currencyEditText, { color: editCurrency === curr ? ACCENT : colors.text }]}>
-                                        {curr}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        {wallet?.users?.length > 1 && (
-                            <>
-                                <Text style={[styles.label, { color: colors.textSecondary }]}>Presupuesto mensual</Text>
-                                <TextInput
-                                    placeholder="0.00"
-                                    placeholderTextColor={colors.textTertiary}
-                                    value={editBudget}
-                                    onChangeText={setEditBudget}
-                                    keyboardType="numeric"
-                                    style={[
-                                        styles.input,
-                                        { backgroundColor: colors.surface, color: colors.text, borderColor: colors.surfaceBorder },
-                                    ]}
-                                />
-                            </>
-                        )}
-
-                        <View style={styles.modalActions}>
-                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEditModal(false)}>
-                                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: ACCENT }]} onPress={saveWalletChanges}>
-                                <Text style={styles.confirmBtnText}>Guardar</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+  {/* Edit Modal */}
+  <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
+  <View style={styles.modalBottomOverlay}>
+  <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
+  <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+  <Text style={[styles.modalTitle, { color: colors.text }]}>Editar wallet</Text>
+  
+  <Text style={[styles.label, { color: colors.textSecondary }]}>Nombre</Text>
+  <View style={styles.emojiContainer}>
+  <TouchableOpacity onPress={() => setEmojiPickerOpen(true)}>
+  <Text style={{ fontSize: 28 }}>{editIcon || "🐯"}</Text>
+  </TouchableOpacity>
+  <EmojiHubPicker
+  visible={emojiPickerOpen}
+  onClose={() => setEmojiPickerOpen(false)}
+  onEmojiSelected={(emoji) => {
+  setEditIcon(emoji)
+  }}
+  />
+  <TextInput
+  placeholder="Nombre de la wallet"
+  placeholderTextColor={colors.textTertiary}
+  value={editName}
+  onChangeText={setEditName}
+  style={[
+  styles.input,
+  {
+  backgroundColor: colors.surface,
+  color: colors.text,
+  borderColor: colors.surfaceBorder,
+  flex: 1,
+  height: 48,
+  marginLeft: 12,
+  },
+  ]}
+  />
+  </View>
+  
+  <View style={styles.modalActions}>
+  <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEditModal(false)}>
+  <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: ACCENT }]} onPress={saveWalletChanges}>
+  <Text style={styles.confirmBtnText}>Guardar</Text>
+  </TouchableOpacity>
+  </View>
+  </View>
+  </View>
+  </Modal>
 
             {/* Delete Modal */}
             <Modal
@@ -1081,10 +1054,17 @@ const styles = StyleSheet.create({
     modalHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 20 },
     modalTitle: { fontSize: 20, fontWeight: "700", marginBottom: 20 },
 
-    label: { fontSize: 12, fontWeight: "600", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
-    input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, marginBottom: 16 },
-
-    currencyEditSelector: { flexDirection: "row", borderRadius: 12, padding: 4, borderWidth: 1, marginBottom: 20 },
+  label: { fontSize: 12, fontWeight: "600", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
+  input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, marginBottom: 16 },
+  
+  emojiContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+  },
+  
+  currencyEditSelector: { flexDirection: "row", borderRadius: 12, padding: 4, borderWidth: 1, marginBottom: 20 },
     currencyOption: { flex: 1, paddingVertical: 12, alignItems: "center", borderRadius: 10 },
     currencyEditText: { fontSize: 15, fontWeight: "600" },
 

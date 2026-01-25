@@ -35,6 +35,7 @@ router.get("/check_wallets", async (req, res) => {
 router.post("/wallets", async (req, res) => {
     try {
         const { userId, name, currency, icon } = req.body
+        
         if (!userId || !name) {
             return res.status(400).json({ error: "Faltan datos obligatorios" })
         }
@@ -178,16 +179,15 @@ router.get("/get-wallet", async (req, res) => {
 // =========================
 router.put("/edit-wallet", async (req, res) => {
     try {
-        const { id, name, currency, budget } = req.body
-        if (!id || !name || !currency) {
+        const { id, name, icon } = req.body
+        if (!id || !name || !icon) {
             return res.status(400).json({ error: "Faltan datos obligatorios" })
         }
 
         const wallet = await Wallet.findById(id)
 
         wallet.name = name
-        wallet.currency = currency
-        wallet.budget = budget
+        wallet.icon = icon
 
         await wallet.save()
 

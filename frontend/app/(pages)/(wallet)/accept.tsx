@@ -21,6 +21,7 @@ export default function AcceptInvite() {
 
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState(false)
 
     useEffect(() => {
         if (!token) {
@@ -51,6 +52,13 @@ export default function AcceptInvite() {
                     setLoading(false)
                     return
                 }
+
+                // Aceptación exitosa - mostrar feedback breve y redirigir
+                setSuccess(true)
+                setLoading(false)
+                setTimeout(() => {
+                    router.replace("/wallets")
+                }, 800)
             } catch {
                 setError("Error al aceptar la invitación")
                 setLoading(false)
@@ -63,8 +71,19 @@ export default function AcceptInvite() {
     if (loading) {
         return (
             <SafeAreaView style={styles.container}>
-                <ActivityIndicator size="large" />
+                <ActivityIndicator size="large" color="#A855F7" />
                 <Text style={styles.infoText}>Aceptando invitación...</Text>
+            </SafeAreaView>
+        )
+    }
+
+    if (success) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.successIcon}>
+                    <Text style={styles.successEmoji}>✓</Text>
+                </View>
+                <Text style={styles.successText}>Aceptado</Text>
             </SafeAreaView>
         )
     }
@@ -73,8 +92,8 @@ export default function AcceptInvite() {
         return (
             <SafeAreaView style={styles.container}>
                 <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-                    <Text style={styles.buttonText}>Volver</Text>
+                <TouchableOpacity style={styles.button} onPress={() => router.push("/wallets")}>
+                    <Text style={styles.buttonText}>Ir a Wallets</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         )
@@ -97,6 +116,25 @@ const styles = StyleSheet.create({
         color: "#000",
         fontWeight: "600",
     },
+    successIcon: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: "#A855F7",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    successEmoji: {
+        fontSize: 40,
+        color: "#fff",
+        fontWeight: "700",
+    },
+    successText: {
+        fontSize: 20,
+        color: "#A855F7",
+        fontWeight: "700",
+    },
     errorText: {
         fontSize: 16,
         color: "#e74c3c",
@@ -104,7 +142,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     button: {
-        backgroundColor: "rgb(255, 107, 53)",
+        backgroundColor: "#A855F7",
         paddingVertical: 12,
         paddingHorizontal: 24,
         borderRadius: 12,

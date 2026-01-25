@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -17,21 +16,23 @@ import { Link, router } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
-const API_URL = "http://localhost:3000"
+const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Por favor completa todos los campos")
+      setErrorMessage("Por favor completa todos los campos")
       return
     }
 
     setLoading(true)
+    setErrorMessage("")
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
@@ -48,20 +49,19 @@ export default function LoginScreen() {
         await AsyncStorage.setItem("userName", data.user.name)
         await AsyncStorage.setItem("userEmail", data.user.email)
         await AsyncStorage.setItem("isVerified", "true")
-        Alert.alert("Éxito", "Inicio de sesión exitoso")
         router.replace("/(tabs)")
       } else {
         // Mostrar mensajes específicos según el error
         if (response.status === 401) {
-          Alert.alert("Error", "Contraseña incorrecta")
+          setErrorMessage("Contraseña incorrecta")
         } else if (response.status === 404) {
-          Alert.alert("Error", "Usuario no encontrado")
+          setErrorMessage("Usuario no encontrado")
         } else {
-          Alert.alert("Error", data.message || "Error al iniciar sesión")
+          setErrorMessage(data.message || "Error al iniciar sesión")
         }
       }
     } catch (error) {
-      Alert.alert("Error", "No se pudo conectar con el servidor")
+      setErrorMessage("No se pudo conectar con el servidor")
     } finally {
       setLoading(false)
     }
@@ -82,12 +82,21 @@ export default function LoginScreen() {
                 <Text style={styles.tagline}>powered by Nomad</Text>
               </View>
 
+              {errorMessage ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              ) : null}
+
               <TextInput
                 style={styles.input}
                 placeholder="Email"
                 placeholderTextColor="#666"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text)
+                  setErrorMessage("")
+                }}
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
@@ -244,5 +253,19 @@ const styles = StyleSheet.create({
   forgotText: {
     color: "#666",
     fontSize: 13,
+  },
+  errorContainer: {
+    backgroundColor: "#fee",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#fcc",
+  },
+  errorText: {
+    color: "#c00",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
   },
 })

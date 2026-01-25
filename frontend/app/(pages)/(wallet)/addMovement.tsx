@@ -10,7 +10,6 @@ import {
     SafeAreaView,
     StyleSheet,
     ActivityIndicator,
-    Alert,
     Modal,
     KeyboardAvoidingView,
     Platform,
@@ -143,6 +142,7 @@ export default function AddMovementScreen() {
     const [splitData, setSplitData] = useState<Record<string, number> | null>(null)
 
     const [userAmounts, setUserAmounts] = useState<Record<string, string>>({})
+    const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
         if (!id) return
@@ -215,7 +215,7 @@ export default function AddMovementScreen() {
             }
         } catch (err) {
             console.error(err)
-            Alert.alert("Error", "No se pudieron cargar los datos")
+            setErrorMessage("No se pudieron cargar los datos")
         } finally {
             setLoading(false)
         }
@@ -227,10 +227,23 @@ export default function AddMovementScreen() {
     }
 
     const handleCreateMovement = async () => {
-        if (!amount) return Alert.alert("Error", "Ingresa una cantidad")
-        if (type !== "transfer" && !category) return Alert.alert("Error", "Selecciona una categoría")
-        if (!selectedUser) return Alert.alert("Error", "Selecciona un usuario")
-        if (type === "transfer" && !transferToUser) return Alert.alert("Error", "Selecciona el destinatario")
+        if (!amount) {
+            setErrorMessage("Ingresa una cantidad")
+            return
+        }
+        if (type !== "transfer" && !category) {
+            setErrorMessage("Selecciona una categoría")
+            return
+        }
+        if (!selectedUser) {
+            setErrorMessage("Selecciona un usuario")
+            return
+        }
+        if (type === "transfer" && !transferToUser) {
+            setErrorMessage("Selecciona el destinatario")
+            return
+        }
+        setErrorMessage("")
 
         try {
             const userId = await AsyncStorage.getItem("userId")
@@ -304,7 +317,6 @@ export default function AddMovementScreen() {
                     }
                 }
 
-                Alert.alert("Listo", "Gasto dividido creado correctamente")
                 router.push(`/wallet?id=${id}`)
                 return
             }
@@ -341,7 +353,6 @@ export default function AddMovementScreen() {
                     })
                 }
 
-                Alert.alert("Listo", "Transferencia realizada")
                 router.push(`/wallet?id=${id}`)
                 return
             }
@@ -371,15 +382,14 @@ export default function AddMovementScreen() {
             })
 
             if (res.ok) {
-                Alert.alert("Listo", "Movimiento creado")
                 router.push(`/wallet?id=${id}`)
             } else {
                 const data = await res.json()
-                Alert.alert("Error", data.error || "No se pudo crear")
+                setErrorMessage(data.error || "No se pudo crear")
             }
         } catch (err) {
             console.error(err)
-            Alert.alert("Error", "No se pudo conectar")
+            setErrorMessage("No se pudo conectar")
         }
     }
 
@@ -408,6 +418,12 @@ export default function AddMovementScreen() {
                 </View>
 
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+                    {errorMessage ? (
+                        <View style={[styles.errorContainer, { backgroundColor: "#fee", borderColor: "#fcc" }]}>
+                            <Text style={styles.errorText}>{errorMessage}</Text>
+                        </View>
+                    ) : null}
+
                     <View style={[styles.typeSelector, { backgroundColor: colors.surface }]}>
                         {availableTypes.map((t) => (
                             <TouchableOpacity
@@ -533,7 +549,6 @@ export default function AddMovementScreen() {
                             style={[styles.splitBtn, { backgroundColor: colors.surface, borderColor: splitData ? ACCENT : colors.surfaceBorder }]}
                             onPress={() => {
                                 if (!amount) {
-                                    Alert.alert("Error", "Ingresa un monto primero")
                                     return
                                 }
                                 setSplitModalVisible(true)
@@ -767,7 +782,6 @@ export default function AddMovementScreen() {
                                         const remaining = Number.parseFloat(amount) - totalSplit
                                         
                                         if (Math.abs(remaining) >= 0.01) {
-                                            Alert.alert("Error", "La suma no coincide con el total")
                                             return
                                         }
                                     }
@@ -799,9 +813,24 @@ const styles = StyleSheet.create({
     backBtn: { width: 40, height: 40, borderRadius: 12, justifyContent: "center", alignItems: "center" },
     headerTitle: { fontSize: 17, fontWeight: "600" },
 
-    content: { paddingHorizontal: 24, paddingBottom: 120 },
-
-    typeSelector: { flexDirection: "row", borderRadius: 12, padding: 4, marginBottom: 32 },
+  content: { paddingHorizontal: 24, paddingBottom: 120 },
+  
+  errorContainer: {
+    backgroundColor: "#fee",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#fcc",
+  },
+  errorText: {
+    color: "#c00",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  
+  typeSelector: { flexDirection: "row", borderRadius: 12, padding: 4, marginBottom: 32 },
     typeBtn: { flex: 1, paddingVertical: 12, alignItems: "center", borderRadius: 10 },
     typeBtnText: { fontSize: 15, fontWeight: "600" },
 

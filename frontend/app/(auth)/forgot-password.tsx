@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,19 +14,25 @@ import {
 } from "react-native"
 import { router } from "expo-router"
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
 
   const handleForgotPassword = async () => {
     if (!email) {
-      Alert.alert("Error", "Por favor ingresa tu email")
+      setErrorMessage("Por favor ingresa tu email")
       return
     }
 
     setLoading(true)
+    setErrorMessage("")
+    setSuccessMessage("")
     try {
-      const response = await fetch("http://localhost:3000/api/auth/forgot-password", {
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,17 +43,15 @@ export default function ForgotPasswordScreen() {
       const data = await response.json()
 
       if (response.ok) {
-        Alert.alert("Éxito", "Se ha enviado un enlace de recuperación a tu email", [
-          {
-            text: "OK",
-            onPress: () => router.push("/(auth)/reset-password" as any),
-          },
-        ])
+        setSuccessMessage("Se ha enviado un enlace de recuperación a tu email")
+        setTimeout(() => {
+          router.push("/(auth)/reset-password" as any)
+        }, 2000)
       } else {
-        Alert.alert("Error", data.message || "Error al enviar enlace")
+        setErrorMessage(data.message || "Error al enviar enlace")
       }
     } catch (error) {
-      Alert.alert("Error", "No se pudo conectar con el servidor")
+      setErrorMessage("No se pudo conectar con el servidor")
     } finally {
       setLoading(false)
     }
@@ -75,12 +78,27 @@ export default function ForgotPasswordScreen() {
                 Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.
               </Text>
 
+              {errorMessage ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              ) : null}
+
+              {successMessage ? (
+                <View style={styles.successContainer}>
+                  <Text style={styles.successText}>{successMessage}</Text>
+                </View>
+              ) : null}
+
               <TextInput
                 style={styles.input}
                 placeholder="Email"
                 placeholderTextColor="#666"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text)
+                  setErrorMessage("")
+                }}
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
@@ -185,5 +203,33 @@ const styles = StyleSheet.create({
   backText: {
     color: "#666",
     fontSize: 14,
+  },
+  errorContainer: {
+    backgroundColor: "#fee",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#fcc",
+  },
+  errorText: {
+    color: "#c00",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  successContainer: {
+    backgroundColor: "#efe",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#cfc",
+  },
+  successText: {
+    color: "#0a0",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
   },
 })

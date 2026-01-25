@@ -17,7 +17,7 @@ export default function Index() {
 
             const initialUrl = await Linking.getInitialURL();
 
-            if (initialUrl?.includes("reset-password")) {
+            if (initialUrl?.includes("reset-password") || initialUrl?.includes("accept")) {
                 return; 
             }
 

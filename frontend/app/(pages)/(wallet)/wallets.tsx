@@ -8,7 +8,6 @@ import {
     Modal,
     SafeAreaView,
     TextInput,
-    Alert,
     StyleSheet,
     ScrollView,
 } from "react-native"
@@ -71,6 +70,8 @@ const getFlag = (currency: string) => {
     return CURRENCY_FLAGS[code] || "💰"
 }
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL 
+
 export default function WalletsScreen() {
     const { colors } = useTheme()
     const { t } = useLanguage()
@@ -85,13 +86,14 @@ export default function WalletsScreen() {
     const [optionsVisible, setOptionsVisible] = useState(false)
     const [open, setOpen] = useState(false)
     const [chosen, setChosen] = useState("")
+    const [errorMessage, setErrorMessage] = useState("")
 
     const router = useRouter()
 
     const loadWallets = async () => {
         const userId = await AsyncStorage.getItem("userId")
         if (!userId) return
-        const res = await fetch(`http://localhost:3000/api/wallet/check_wallets?userId=${userId}`)
+        const res = await fetch(`${API_URL}/api/wallet/check_wallets?userId=${userId}`)
         const data = await res.json()
         setWallets(data.wallets || [])
     }
@@ -102,26 +104,29 @@ export default function WalletsScreen() {
 
     const addWallet = async () => {
         if (!name.trim()) {
-            Alert.alert(t("errorTitle"), t("nameRequired"))
+            setErrorMessage(t("nameRequired"))
             return
         }
+        setErrorMessage("")
         try {
             const userId = await AsyncStorage.getItem("userId")
-            const res = await fetch(`http://localhost:3000/api/wallet/wallets`, {
+            const res = await fetch(`${API_URL}/api/wallet/wallets`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId, name, currency, icon: emoji }),
             })
             if (!res.ok) {
                 const err = await res.json()
-                throw new Error(err.error)
+                setErrorMessage(err.error || t("couldNotCreate"))
+                return
             }
             setName("")
             setCurrency("EUR")
+            setChosen("")
             setCreateWalletVisible(false)
             await loadWallets()
         } catch (error: any) {
-            Alert.alert(t("errorTitle"), error.message || t("couldNotCreate"))
+            setErrorMessage(error.message || t("couldNotCreate"))
         }
     }
 
@@ -214,6 +219,12 @@ export default function WalletsScreen() {
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>{t("newWallet")}</Text>
 
+                        {errorMessage ? (
+                            <View style={[styles.errorContainer, { backgroundColor: "#fee", borderColor: "#fcc" }]}>
+                                <Text style={styles.errorText}>{errorMessage}</Text>
+                            </View>
+                        ) : null}
+
                         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t("name")}</Text>
                         <View style={styles.emojiContainer}>
 
@@ -232,7 +243,10 @@ export default function WalletsScreen() {
                                 placeholder={t("exampleName")}
                                 placeholderTextColor={colors.textTertiary}
                                 value={name}
-                                onChangeText={setName}
+                                onChangeText={(text) => {
+                                    setName(text)
+                                    setErrorMessage("")
+                                }}
                                 style={[
                                     styles.input,
                                     {
@@ -445,4 +459,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
     },
     optionText: { fontSize: 15, fontWeight: "500" },
+    errorContainer: {
+        backgroundColor: "#fee",
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 14,
+        borderWidth: 1,
+        borderColor: "#fcc",
+    },
+    errorText: {
+        color: "#c00",
+        fontSize: 14,
+        textAlign: "center",
+        fontWeight: "500",
+    },
 })

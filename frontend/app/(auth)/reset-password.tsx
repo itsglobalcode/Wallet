@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,6 +15,8 @@ import {
 import { router, useLocalSearchParams } from "expo-router"
 import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+
 export default function AuthResetPasswordScreen() {
   const { token } = useLocalSearchParams()
   const [newPassword, setNewPassword] = useState("")
@@ -23,31 +24,33 @@ export default function AuthResetPasswordScreen() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const handleResetPassword = async () => {
     if (!token) {
-      Alert.alert("Error", "Token inválido. Solicita un nuevo enlace de recuperación.")
+      setErrorMessage("Token inválido. Solicita un nuevo enlace de recuperación.")
       return
     }
 
     if (!newPassword || !confirmPassword) {
-      Alert.alert("Error", "Por favor completa todos los campos")
+      setErrorMessage("Por favor completa todos los campos")
       return
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert("Error", "Las contraseñas no coinciden")
+      setErrorMessage("Las contraseñas no coinciden")
       return
     }
 
     if (newPassword.length < 6) {
-      Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres")
+      setErrorMessage("La contraseña debe tener al menos 6 caracteres")
       return
     }
 
     setLoading(true)
+    setErrorMessage("")
     try {
-      const response = await fetch("http://localhost:3000/api/auth/reset-password", {
+      const response = await fetch(`${API_URL}/api/auth/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,10 +63,10 @@ export default function AuthResetPasswordScreen() {
       if (response.ok) {
         router.replace("/(auth)/login" as any)
       } else {
-        Alert.alert("Error", "Error al restablecer contraseña")
+        setErrorMessage("Error al restablecer contraseña")
       }
     } catch (error) {
-      Alert.alert("Error", "No se pudo conectar con el servidor")
+      setErrorMessage("No se pudo conectar con el servidor")
     } finally {
       setLoading(false)
     }
@@ -88,13 +91,22 @@ export default function AuthResetPasswordScreen() {
 
               <Text style={styles.description}>Ingresa tu nueva contraseña para acceder a tu cuenta.</Text>
 
+              {errorMessage ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              ) : null}
+
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Nueva contraseña"
                   placeholderTextColor="#666"
                   value={newPassword}
-                  onChangeText={setNewPassword}
+                  onChangeText={(text) => {
+                    setNewPassword(text)
+                    setErrorMessage("")
+                  }}
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity
@@ -253,5 +265,19 @@ const styles = StyleSheet.create({
   backText: {
     color: "#666",
     fontSize: 14,
+  },
+  errorContainer: {
+    backgroundColor: "#fee",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#fcc",
+  },
+  errorText: {
+    color: "#c00",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
   },
 })
