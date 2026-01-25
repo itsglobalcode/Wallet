@@ -36,7 +36,6 @@ async function seedCategories() {
 
     await mongoose.disconnect()
   } catch (error) {
-    console.error("Error seeding categories:", error)
     process.exit(1)
   }
 }

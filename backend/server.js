@@ -35,7 +35,8 @@ mongoose
   .then(() => {
     verifyEmailConfig()
   })
-  .catch((err) => console.error("❌ Error al conectar MongoDB:", err))
+  .catch((err) => {})
+
 
 // =====================
 // Rutas

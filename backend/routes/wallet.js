@@ -152,7 +152,6 @@ router.put("/accept-invite", async (req, res) => {
         invite.status = "accepted"
         await invite.save()
     } catch (err) {
-        console.error("ACCEPT INVITE ERROR:", err)
         res.status(500).send("Error al aceptar invitación")
     }
 })
@@ -193,7 +192,6 @@ router.put("/edit-wallet", async (req, res) => {
 
         res.json({ wallet })
     } catch (err) {
-        console.error("EDIT WALLET ERROR:", err)
         res.status(500).json({ error: "Error al editar wallet" })
     }
 })
@@ -268,7 +266,6 @@ router.post("/movements", async (req, res) => {
 
         res.status(201).json({ movement })
     } catch (err) {
-        console.error("CREATE MOVEMENT ERROR:", err)
         res.status(500).json({ error: "Error al crear movimiento" })
     }
 })

@@ -20,12 +20,11 @@ import { useTheme } from "@/contexts/ThemeContext"
 
 import ArrowLeftIcon from "@/components/svg/arrow-left"
 import ChevronDownIcon from "@/components/svg/chevronDown-symbol"
-import SettingsIcon from "@/components/svg/settings-symbol"
 import ShareUserIcon from "@/components/svg/share-user-symbol"
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL
 const API = `${API_URL}/api/wallet`
-const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_CURRENCY_API_KEY}`
+const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_KEY}`
 
 type MovementType = "expense" | "income" | "transfer"
 
@@ -186,7 +185,6 @@ export default function AddMovementScreen() {
             const data = await res.json()
             setRates(data.rates || {})
         } catch (err) {
-            console.error(err)
         } finally {
             setRatesLoading(false)
         }
@@ -214,7 +212,6 @@ export default function AddMovementScreen() {
                 }
             }
         } catch (err) {
-            console.error(err)
             setErrorMessage("No se pudieron cargar los datos")
         } finally {
             setLoading(false)
@@ -388,7 +385,6 @@ export default function AddMovementScreen() {
                 setErrorMessage(data.error || "No se pudo crear")
             }
         } catch (err) {
-            console.error(err)
             setErrorMessage("No se pudo conectar")
         }
     }
@@ -410,7 +406,7 @@ export default function AddMovementScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.surface }]}>
+                    <TouchableOpacity onPress={() => router.push(`/wallet?id=${id}`)} style={[styles.backBtn, { backgroundColor: colors.surface }]}>
                         <ArrowLeftIcon color={colors.text} />
                     </TouchableOpacity>
                     <Text style={[styles.headerTitle, { color: colors.text }]}>Nuevo movimiento</Text>
@@ -503,9 +499,7 @@ export default function AddMovementScreen() {
                                         {transferToUser?.name?.charAt(0) || "?"}
                                     </Text>
                                 </View>
-                                <Text style={[styles.selectorText, { color: colors.text }]}>
-                                    {transferToUser?.name || "Seleccionar"}
-                                </Text>
+                                <Text style={[styles.selectorText, { color: colors.text }]}>{transferToUser?.name || "Seleccionar"}</Text>
                                 <ChevronDownIcon color={colors.textTertiary} />
                             </TouchableOpacity>
                         </View>
@@ -531,10 +525,7 @@ export default function AddMovementScreen() {
                     <View style={styles.fieldGroup}>
                         <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Nota (opcional)</Text>
                         <TextInput
-                            style={[
-                                styles.notesInput,
-                                { backgroundColor: colors.surface, color: colors.text, borderColor: colors.surfaceBorder },
-                            ]}
+                            style={[styles.notesInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.surfaceBorder }]}
                             value={notes}
                             onChangeText={setNotes}
                             placeholder="Añadir descripción..."
@@ -570,10 +561,19 @@ export default function AddMovementScreen() {
             </KeyboardAvoidingView>
 
             {/* Category Modal */}
-            <Modal visible={categoryModalVisible} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+            <Modal visible={categoryModalVisible} transparent animationType="slide" onRequestClose={() => setCategoryModalVisible(false)}>
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setCategoryModalVisible(false)}
+                >
+                    <View 
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            onPress={() => setCategoryModalVisible(false)}
+                        />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Categoría</Text>
                         <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
                             {categories.map((cat) => (
@@ -595,14 +595,23 @@ export default function AddMovementScreen() {
                             <Text style={[styles.modalCloseText, { color: colors.textSecondary }]}>Cerrar</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {/* User Modal */}
-            <Modal visible={userModalVisible} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+            <Modal visible={userModalVisible} transparent animationType="slide" onRequestClose={() => setUserModalVisible(false)}>
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setUserModalVisible(false)}
+                >
+                    <View 
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            onPress={() => setUserModalVisible(false)}
+                        />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Seleccionar usuario</Text>
                         <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
                             {users.map((u) => (
@@ -614,7 +623,7 @@ export default function AddMovementScreen() {
                                         setUserModalVisible(false)
                                     }}
                                 >
-                                    <View style={[styles.userAvatar, { backgroundColor: colors.surface }]}>
+                                    <View style={[styles.userAvatar, { backgroundColor: colors.surface }]} >
                                         <Text style={[styles.userAvatarText, { color: colors.text }]}>{u.name?.charAt(0)}</Text>
                                     </View>
                                     <Text style={[styles.modalItemText, { color: colors.text, flex: 1 }]}>{u.name}</Text>
@@ -626,14 +635,23 @@ export default function AddMovementScreen() {
                             <Text style={[styles.modalCloseText, { color: colors.textSecondary }]}>Cerrar</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {/* Transfer To User Modal */}
-            <Modal visible={toUserModalVisible} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+            <Modal visible={toUserModalVisible} transparent animationType="slide" onRequestClose={() => setToUserModalVisible(false)}>
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setToUserModalVisible(false)}
+                >
+                    <View 
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            onPress={() => setToUserModalVisible(false)}
+                        />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Transferir a</Text>
                         <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
                             {users
@@ -659,13 +677,22 @@ export default function AddMovementScreen() {
                             <Text style={[styles.modalCloseText, { color: colors.textSecondary }]}>Cerrar</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
-            <Modal visible={currencyModalVisible} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+            <Modal visible={currencyModalVisible} transparent animationType="slide" onRequestClose={() => setCurrencyModalVisible(false)}>
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setCurrencyModalVisible(false)}
+                >
+                    <View 
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            onPress={() => setCurrencyModalVisible(false)}
+                        />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda del gasto</Text>
                         <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
                             {CURRENCIES.map((curr) => (
@@ -689,14 +716,23 @@ export default function AddMovementScreen() {
                             <Text style={[styles.modalCloseText, { color: colors.textSecondary }]}>Cerrar</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {/* Split Expense Modal */}
-            <Modal visible={splitModalVisible} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+            <Modal visible={splitModalVisible} transparent animationType="slide" onRequestClose={() => setSplitModalVisible(false)}>
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setSplitModalVisible(false)}
+                >
+                    <View 
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            onPress={() => setSplitModalVisible(false)}
+                        />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Dividir gasto</Text>
                         <Text style={[styles.splitSubtitle, { color: colors.textSecondary }]}>
                             Total: {amount} {expenseCurrency}
@@ -737,32 +773,26 @@ export default function AddMovementScreen() {
                                     </View>
                                 </View>
                             ))}
-
-                            {splitData && (() => {
-                                const totalSplit = Object.values(splitData).reduce((sum, val) => sum + (val || 0), 0)
-                                const remaining = Number.parseFloat(amount) - totalSplit
-                                const isValid = Math.abs(remaining) < 0.01 // Tolerancia para decimales
-                                
-                                return (
-                                    <View style={[
-                                        styles.splitSummary,
-                                        { 
-                                            backgroundColor: isValid ? `${ACCENT}10` : "#FFE5E5",
-                                            borderColor: isValid ? `${ACCENT}30` : "#FF6B6B"
-                                        }
-                                    ]}>
-                                        <Text style={[styles.splitSummaryLabel, { color: colors.textSecondary }]}>
-                                            {isValid ? "✓ Suma correcta" : "⚠ Falta asignar"}
-                                        </Text>
-                                        {!isValid && (
-                                            <Text style={[styles.splitRemaining, { color: "#FF6B6B" }]}>
-                                                {remaining.toFixed(2)} {expenseCurrency}
-                                            </Text>
-                                        )}
-                                    </View>
-                                )
-                            })()}
                         </ScrollView>
+
+                        {splitData && (() => {
+                            const totalSplit = Object.values(splitData).reduce((sum, val) => sum + (val || 0), 0)
+                            const remaining = Number.parseFloat(amount) - totalSplit
+                            const isValid = Math.abs(remaining) < 0.01 // Tolerancia para decimales
+                            
+                            return (
+                                <View style={[styles.splitSummary, { backgroundColor: isValid ? `${ACCENT}10` : "#FFE5E5", borderColor: isValid ? `${ACCENT}30` : "#FF6B6B" }]}>
+                                    <Text style={[styles.splitSummaryLabel, { color: colors.textSecondary }]}>
+                                        {isValid ? "✓ Suma correcta" : "⚠ Falta asignar"}
+                                    </Text>
+                                    {!isValid && (
+                                        <Text style={[styles.splitRemaining, { color: "#FF6B6B" }]}>
+                                            {remaining.toFixed(2)} {expenseCurrency}
+                                        </Text>
+                                    )}
+                                </View>
+                            )
+                        })()}
 
                         <View style={styles.splitActions}>
                             <TouchableOpacity 
@@ -792,7 +822,7 @@ export default function AddMovementScreen() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
         </SafeAreaView>
     )
@@ -813,24 +843,24 @@ const styles = StyleSheet.create({
     backBtn: { width: 40, height: 40, borderRadius: 12, justifyContent: "center", alignItems: "center" },
     headerTitle: { fontSize: 17, fontWeight: "600" },
 
-  content: { paddingHorizontal: 24, paddingBottom: 120 },
+    content: { paddingHorizontal: 24, paddingBottom: 120 },
   
-  errorContainer: {
-    backgroundColor: "#fee",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#fcc",
-  },
-  errorText: {
-    color: "#c00",
-    fontSize: 14,
-    textAlign: "center",
-    fontWeight: "500",
-  },
+    errorContainer: {
+        backgroundColor: "#fee",
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 14,
+        borderWidth: 1,
+        borderColor: "#fcc",
+    },
+    errorText: {
+        color: "#c00",
+        fontSize: 14,
+        textAlign: "center",
+        fontWeight: "500",
+    },
   
-  typeSelector: { flexDirection: "row", borderRadius: 12, padding: 4, marginBottom: 32 },
+    typeSelector: { flexDirection: "row", borderRadius: 12, padding: 4, marginBottom: 32 },
     typeBtn: { flex: 1, paddingVertical: 12, alignItems: "center", borderRadius: 10 },
     typeBtnText: { fontSize: 15, fontWeight: "600" },
 

@@ -112,6 +112,18 @@ export default function CurrencyExchangeScreen() {
         setConvertedAmount(result.toFixed(2))
     }
 
+    const convertCurrencyReverse = () => {
+        if (!rates[fromCurrency] || !rates[toCurrency] || !convertedAmount) {
+            setAmount("0")
+            return
+        }
+        const fromRate = Number.parseFloat(rates[fromCurrency])
+        const toRate = Number.parseFloat(rates[toCurrency])
+        const convertedNum = Number.parseFloat(convertedAmount) || 0
+        const result = (convertedNum / toRate) * fromRate
+        setAmount(result.toFixed(2))
+    }
+
     const swapCurrencies = () => {
         Animated.sequence([
             Animated.timing(rotateAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
@@ -138,7 +150,7 @@ export default function CurrencyExchangeScreen() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.surface }]}>
+                <TouchableOpacity onPress={() => router.push("/wallets")} style={[styles.backBtn, { backgroundColor: colors.surface }]}>
                     <ArrowLeftIcon color={colors.text} />
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { color: colors.text }]}>Cambio</Text>
@@ -149,52 +161,71 @@ export default function CurrencyExchangeScreen() {
                 <View
                     style={[styles.converterCard, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}
                 >
-                    <TouchableOpacity
-                        style={[styles.currencyRow, { backgroundColor: colors.surface }]}
-                        onPress={() => setShowFromPicker(true)}
-                    >
-                        <Text style={styles.currencyFlag}>{getCurrency(fromCurrency).flag}</Text>
-                        <View style={styles.currencyInfo}>
-                            <Text style={[styles.currencyCode, { color: colors.text }]}>{fromCurrency}</Text>
-                            <Text style={[styles.currencyName, { color: colors.textTertiary }]}>
-                                {getCurrency(fromCurrency).name}
-                            </Text>
-                        </View>
-                        <ChevronDownIcon color={colors.textTertiary} />
-                    </TouchableOpacity>
+                    {/* From Currency with Amount Input */}
+                    <View style={styles.inputSection}>
+                        <TouchableOpacity
+                            style={[styles.currencyRow, { backgroundColor: colors.surface }]}
+                            onPress={() => setShowFromPicker(true)}
+                        >
+                            <Text style={styles.currencyFlag}>{getCurrency(fromCurrency).flag}</Text>
+                            <View style={styles.currencyInfo}>
+                                <Text style={[styles.currencyCode, { color: colors.text }]}>{fromCurrency}</Text>
+                                <Text style={[styles.currencyName, { color: colors.textTertiary }]}>
+                                    {getCurrency(fromCurrency).name}
+                                </Text>
+                            </View>
+                            <ChevronDownIcon color={colors.textTertiary} />
+                        </TouchableOpacity>
 
-                    <TextInput
-                        style={[styles.amountInput, { backgroundColor: colors.surface, color: colors.text }]}
-                        value={amount}
-                        onChangeText={setAmount}
-                        keyboardType="numeric"
-                        placeholder="0"
-                        placeholderTextColor={colors.textTertiary}
-                    />
+                        <TextInput
+                            style={[styles.amountInput, { backgroundColor: colors.surface, color: colors.text }]}
+                            value={amount}
+                            onChangeText={setAmount}
+                            keyboardType="numeric"
+                            placeholder="0"
+                            placeholderTextColor={colors.textTertiary}
+                        />
+                    </View>
 
+                    {/* Swap Button */}
                     <Animated.View style={[styles.swapBtnWrapper, { transform: [{ rotate: spin }] }]}>
                         <TouchableOpacity style={[styles.swapBtn, { backgroundColor: ACCENT }]} onPress={swapCurrencies}>
                             <SwapIcon size={18} color="#fff" />
                         </TouchableOpacity>
                     </Animated.View>
 
-                    <TouchableOpacity
-                        style={[styles.currencyRow, { backgroundColor: colors.surface }]}
-                        onPress={() => setShowToPicker(true)}
-                    >
-                        <Text style={styles.currencyFlag}>{getCurrency(toCurrency).flag}</Text>
-                        <View style={styles.currencyInfo}>
-                            <Text style={[styles.currencyCode, { color: colors.text }]}>{toCurrency}</Text>
-                            <Text style={[styles.currencyName, { color: colors.textTertiary }]}>{getCurrency(toCurrency).name}</Text>
-                        </View>
-                        <ChevronDownIcon color={colors.textTertiary} />
-                    </TouchableOpacity>
+                    {/* To Currency with Result */}
+                    <View style={styles.resultSection}>
+                        <TouchableOpacity
+                            style={[styles.currencyRow, { backgroundColor: colors.surface }]}
+                            onPress={() => setShowToPicker(true)}
+                        >
+                            <Text style={styles.currencyFlag}>{getCurrency(toCurrency).flag}</Text>
+                            <View style={styles.currencyInfo}>
+                                <Text style={[styles.currencyCode, { color: colors.text }]}>{toCurrency}</Text>
+                                <Text style={[styles.currencyName, { color: colors.textTertiary }]}>{getCurrency(toCurrency).name}</Text>
+                            </View>
+                            <ChevronDownIcon color={colors.textTertiary} />
+                        </TouchableOpacity>
 
-                    <View style={[styles.resultBox, { backgroundColor: `${ACCENT}10` }]}>
-                        <Text style={[styles.resultAmount, { color: colors.text }]}>
-                            {Number.parseFloat(convertedAmount).toLocaleString("es-ES", { maximumFractionDigits: 2 })}
-                        </Text>
-                        <Text style={[styles.resultCurrency, { color: ACCENT }]}>{toCurrency}</Text>
+                        <TextInput
+                            style={[styles.amountInput, { backgroundColor: colors.surface, color: colors.text }]}
+                            value={convertedAmount}
+                            onChangeText={(text) => {
+                                setConvertedAmount(text)
+                                // Convertir al revés cuando editan el resultado
+                                if (text && rates[fromCurrency] && rates[toCurrency]) {
+                                    const fromRate = Number.parseFloat(rates[fromCurrency])
+                                    const toRate = Number.parseFloat(rates[toCurrency])
+                                    const convertedNum = Number.parseFloat(text) || 0
+                                    const result = (convertedNum / toRate) * fromRate
+                                    setAmount(result.toFixed(2))
+                                }
+                            }}
+                            keyboardType="numeric"
+                            placeholder="0"
+                            placeholderTextColor={colors.textTertiary}
+                        />
                     </View>
                 </View>
 
@@ -362,6 +393,9 @@ const styles = StyleSheet.create({
     content: { paddingHorizontal: 20, paddingBottom: 120 },
 
     converterCard: { borderRadius: 20, padding: 20, borderWidth: 1, marginBottom: 16 },
+    
+    inputSection: { marginBottom: 4 },
+    resultSection: { marginTop: 4 },
 
     currencyRow: {
         flexDirection: "row",

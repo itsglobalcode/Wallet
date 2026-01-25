@@ -133,7 +133,6 @@ NOMAD App - Tu viaje empieza aquí
 const verifyEmailConfig = async () => {
   try {
     if (!process.env.RESEND_API_KEY) {
-      console.error("❌ RESEND_API_KEY no está configurada")
       return false
     }
     return true
