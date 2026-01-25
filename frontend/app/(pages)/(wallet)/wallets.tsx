@@ -227,10 +227,10 @@ export default function WalletsScreen() {
 
                         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t("name")}</Text>
                         <View style={styles.emojiContainer}>
-
-                            <TouchableOpacity onPress={() => setOpen(true)}>
-                                <Text style={{ fontSize: 28 }}>{chosen || "🙂"}</Text>
+                            <TouchableOpacity style={styles.emojiButton} onPress={() => setOpen(true)}>
+                                <Text style={styles.emojiText}>{chosen || "🙂"}</Text>
                             </TouchableOpacity>
+
                             <EmojiHubPicker
                                 visible={open}
                                 onClose={() => setOpen(false)}
@@ -239,6 +239,7 @@ export default function WalletsScreen() {
                                     setEmoji(emoji)
                                 }}
                             />
+
                             <TextInput
                                 placeholder={t("exampleName")}
                                 placeholderTextColor={colors.textTertiary}
@@ -253,9 +254,9 @@ export default function WalletsScreen() {
                                         backgroundColor: colors.surface,
                                         color: colors.text,
                                         borderColor: colors.surfaceBorder,
-                                        flex: 1,         // ocupa todo el espacio restante
-                                        height: 48,      // igual altura que el emoji
-                                        marginLeft: 12,  // separación entre emoji y input
+                                        flex: 1,
+                                        height: 48,
+                                        marginLeft: 12,
                                     },
                                 ]}
                             />
@@ -289,8 +290,8 @@ export default function WalletsScreen() {
             </Modal>
 
             {/* Currency modal */}
-            <Modal visible={currencyModalVisible} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
+            <Modal visible={currencyModalVisible} transparent animationType="slide" onRequestClose={() => setCurrencyModalVisible(false)}>
+                <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setCurrencyModalVisible(false)}>
                     <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>{t("currency")}</Text>
@@ -314,7 +315,7 @@ export default function WalletsScreen() {
                             <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>{t("close")}</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {optionsVisible && (
@@ -405,8 +406,22 @@ const styles = StyleSheet.create({
     emojiContainer: {
         flexDirection: "row",
         alignItems: "center",
+        justifyContent: "space-between",
         width: "100%",
         marginBottom: 20,
+    },
+
+    emojiButton: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+
+    emojiText: {
+        fontSize: 26,
     },
 
 

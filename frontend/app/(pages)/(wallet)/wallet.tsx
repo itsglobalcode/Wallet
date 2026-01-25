@@ -33,7 +33,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 const USERS_API = `${API_URL}/api/search`
 const WALLET_API = `${API_URL}/api/wallet`
-const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_CURRENCY_API_KEY}`
+const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_KEY}`
 
 type Tab = "movimientos" | "saldos" | "conversor"
 
@@ -418,24 +418,7 @@ export default function WalletDetailScreen() {
                                 <ChevronDownIcon color={colors.textTertiary} />
                             </TouchableOpacity>
 
-                            {/* Amount Input */}
-                            <TextInput
-                                style={[styles.converterInput, { backgroundColor: colors.surface, color: colors.text }]}
-                                value={converterAmount}
-                                onChangeText={setConverterAmount}
-                                keyboardType="numeric"
-                                placeholder="0"
-                                placeholderTextColor={colors.textTertiary}
-                            />
-
-                            {/* Swap Button */}
-                            <Animated.View style={[styles.swapBtnWrapper, { transform: [{ rotate: spin }] }]}>
-                                <TouchableOpacity style={[styles.swapBtn, { backgroundColor: ACCENT }]} onPress={swapCurrencies}>
-                                    <SwapIcon size={16} color="#fff" />
-                                </TouchableOpacity>
-                            </Animated.View>
-
-                            {/* To Currency */}
+                            {/* To Currency (result) */}
                             <TouchableOpacity
                                 style={[styles.currencySelector, { backgroundColor: colors.surface }]}
                                 onPress={() => setShowToPicker(true)}
@@ -457,6 +440,38 @@ export default function WalletDetailScreen() {
                                 </Text>
                                 <Text style={[styles.converterResultCurrency, { color: ACCENT }]}>{toCurrency}</Text>
                             </View>
+
+                            {/* Swap Button */}
+                            <Animated.View style={[styles.swapBtnWrapper, { transform: [{ rotate: spin }] }]}>
+                                <TouchableOpacity style={[styles.swapBtn, { backgroundColor: ACCENT }]} onPress={swapCurrencies}>
+                                    <SwapIcon size={16} color="#fff" />
+                                </TouchableOpacity>
+                            </Animated.View>
+
+                            {/* From Currency */}
+                            <TouchableOpacity
+                                style={[styles.currencySelector, { backgroundColor: colors.surface }]}
+                                onPress={() => setShowFromPicker(true)}
+                            >
+                                <Text style={styles.currencyFlag}>{getCurrency(fromCurrency).flag}</Text>
+                                <View style={styles.currencyInfo}>
+                                    <Text style={[styles.currencyCode, { color: colors.text }]}>{fromCurrency}</Text>
+                                    <Text style={[styles.currencyName, { color: colors.textTertiary }]}>
+                                        {getCurrency(fromCurrency).name}
+                                    </Text>
+                                </View>
+                                <ChevronDownIcon color={colors.textTertiary} />
+                            </TouchableOpacity>
+
+                            {/* Amount Input */}
+                            <TextInput
+                                style={[styles.converterInput, { backgroundColor: colors.surface, color: colors.text }]}
+                                value={converterAmount}
+                                onChangeText={setConverterAmount}
+                                keyboardType="numeric"
+                                placeholder="0"
+                                placeholderTextColor={colors.textTertiary}
+                            />
                         </View>
 
                         {/* Exchange Rate Info */}
@@ -626,12 +641,14 @@ export default function WalletDetailScreen() {
                 />
             )}
 
-            <TouchableOpacity
-                style={[styles.addButton, { backgroundColor: ACCENT }]}
-                onPress={() => router.push(`/addMovement?id=${id}` as any)}
-            >
-                <Plus color="#fff" />
-            </TouchableOpacity>
+            {activeTab === "movimientos" && (
+                <TouchableOpacity
+                    style={[styles.addButton, { backgroundColor: ACCENT }]}
+                    onPress={() => router.push(`/addMovement?id=${id}` as any)}
+                >
+                    <Plus color="#fff" />
+                </TouchableOpacity>
+            )}
 
             {optionsVisible && (
                 <View style={[styles.optionsMenu, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
@@ -654,7 +671,11 @@ export default function WalletDetailScreen() {
                 onRequestClose={() => setShowAddFriendModal(false)}
             >
                 <View style={styles.modalBottomOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
+                    <TouchableOpacity 
+                        style={styles.modalContainer} 
+                        activeOpacity={1} 
+                        onPress={() => setShowAddFriendModal(false)}
+                    >
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Compartir wallet</Text>
                         <TextInput
@@ -693,59 +714,63 @@ export default function WalletDetailScreen() {
                                 <Text style={styles.confirmBtnText}>{posting ? "..." : "Invitar"}</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 </View>
             </Modal>
 
-  {/* Edit Modal */}
-  <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
-  <View style={styles.modalBottomOverlay}>
-  <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-  <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
-  <Text style={[styles.modalTitle, { color: colors.text }]}>Editar wallet</Text>
-  
-  <Text style={[styles.label, { color: colors.textSecondary }]}>Nombre</Text>
-  <View style={styles.emojiContainer}>
-  <TouchableOpacity onPress={() => setEmojiPickerOpen(true)}>
-  <Text style={{ fontSize: 28 }}>{editIcon || "🐯"}</Text>
-  </TouchableOpacity>
-  <EmojiHubPicker
-  visible={emojiPickerOpen}
-  onClose={() => setEmojiPickerOpen(false)}
-  onEmojiSelected={(emoji) => {
-  setEditIcon(emoji)
-  }}
-  />
-  <TextInput
-  placeholder="Nombre de la wallet"
-  placeholderTextColor={colors.textTertiary}
-  value={editName}
-  onChangeText={setEditName}
-  style={[
-  styles.input,
-  {
-  backgroundColor: colors.surface,
-  color: colors.text,
-  borderColor: colors.surfaceBorder,
-  flex: 1,
-  height: 48,
-  marginLeft: 12,
-  },
-  ]}
-  />
-  </View>
-  
-  <View style={styles.modalActions}>
-  <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEditModal(false)}>
-  <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: ACCENT }]} onPress={saveWalletChanges}>
-  <Text style={styles.confirmBtnText}>Guardar</Text>
-  </TouchableOpacity>
-  </View>
-  </View>
-  </View>
-  </Modal>
+            {/* Edit Modal */}
+            <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
+                <View style={styles.modalBottomOverlay}>
+                    <TouchableOpacity 
+                        style={styles.modalContainer} 
+                        activeOpacity={1} 
+                        onPress={() => setShowEditModal(false)}
+                    >
+                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>Editar wallet</Text>
+                        
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>Nombre</Text>
+                        <View style={styles.emojiContainer}>
+                            <TouchableOpacity onPress={() => setEmojiPickerOpen(true)}>
+                                <Text style={{ fontSize: 28 }}>{editIcon || "🐯"}</Text>
+                            </TouchableOpacity>
+                            <EmojiHubPicker
+                                visible={emojiPickerOpen}
+                                onClose={() => setEmojiPickerOpen(false)}
+                                onEmojiSelected={(emoji) => {
+                                    setEditIcon(emoji)
+                                }}
+                            />
+                            <TextInput
+                                placeholder="Nombre de la wallet"
+                                placeholderTextColor={colors.textTertiary}
+                                value={editName}
+                                onChangeText={setEditName}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor: colors.surface,
+                                        color: colors.text,
+                                        borderColor: colors.surfaceBorder,
+                                        flex: 1,
+                                        height: 48,
+                                        marginLeft: 12,
+                                    },
+                                ]}
+                            />
+                        </View>
+                        
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEditModal(false)}>
+                                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: ACCENT }]} onPress={saveWalletChanges}>
+                                <Text style={styles.confirmBtnText}>Guardar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
 
             {/* Delete Modal */}
             <Modal
@@ -755,7 +780,11 @@ export default function WalletDetailScreen() {
                 onRequestClose={() => setShowDeleteModal(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.deleteModalContainer, { backgroundColor: colors.cardBackground }]}>
+                    <TouchableOpacity 
+                        style={styles.deleteModalContainer} 
+                        activeOpacity={1} 
+                        onPress={() => setShowDeleteModal(false)}
+                    >
                         <Text style={[styles.deleteModalTitle, { color: colors.text }]}>¿Eliminar wallet?</Text>
                         <Text style={[styles.deleteModalText, { color: colors.textSecondary }]}>
                             Esta acción no se puede deshacer. Se eliminarán todos los movimientos asociados.
@@ -774,20 +803,23 @@ export default function WalletDetailScreen() {
                                 <Text style={[styles.deleteModalBtnText, { color: "#fff" }]}>Eliminar</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 </View>
             </Modal>
 
             {/* Currency Picker Modals */}
             {showFromPicker && (
-                <Modal
-                    visible={showFromPicker}
-                    transparent
-                    animationType="slide"
-                    onRequestClose={() => setShowFromPicker(false)}
-                >
-                    <View style={styles.modalBottomOverlay}>
-                        <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
+                <Modal visible={showFromPicker} transparent animationType="slide" onRequestClose={() => setShowFromPicker(false)}>
+                    <TouchableOpacity 
+                        style={styles.modalBottomOverlay} 
+                        activeOpacity={1} 
+                        onPress={() => setShowFromPicker(false)}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                            activeOpacity={1}
+                            onPress={(e) => e.stopPropagation()}
+                        >
                             <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
                             <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda origen</Text>
                             <FlatList
@@ -812,16 +844,27 @@ export default function WalletDetailScreen() {
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowFromPicker(false)}>
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cerrar</Text>
                             </TouchableOpacity>
-                        </View>
-                    </View>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
                 </Modal>
             )}
 
             {showToPicker && (
                 <Modal visible={showToPicker} transparent animationType="slide" onRequestClose={() => setShowToPicker(false)}>
-                    <View style={styles.modalBottomOverlay}>
-                        <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                            <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+                    <TouchableOpacity 
+                        style={styles.modalBottomOverlay} 
+                        activeOpacity={1} 
+                        onPress={() => setShowToPicker(false)}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                            activeOpacity={1}
+                            onPress={(e) => e.stopPropagation()}
+                        >
+                            <TouchableOpacity 
+                                style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                                onPress={() => setShowToPicker(false)}
+                            />
                             <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda destino</Text>
                             <FlatList
                                 data={CURRENCIES}
@@ -845,8 +888,8 @@ export default function WalletDetailScreen() {
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowToPicker(false)}>
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cerrar</Text>
                             </TouchableOpacity>
-                        </View>
-                    </View>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
                 </Modal>
             )}
         </SafeAreaView>
@@ -1054,17 +1097,17 @@ const styles = StyleSheet.create({
     modalHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 20 },
     modalTitle: { fontSize: 20, fontWeight: "700", marginBottom: 20 },
 
-  label: { fontSize: 12, fontWeight: "600", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
-  input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, marginBottom: 16 },
-  
-  emojiContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 20,
-  },
-  
-  currencyEditSelector: { flexDirection: "row", borderRadius: 12, padding: 4, borderWidth: 1, marginBottom: 20 },
+    label: { fontSize: 12, fontWeight: "600", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
+    input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, marginBottom: 16 },
+    
+    emojiContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: 20,
+    },
+    
+    currencyEditSelector: { flexDirection: "row", borderRadius: 12, padding: 4, borderWidth: 1, marginBottom: 20 },
     currencyOption: { flex: 1, paddingVertical: 12, alignItems: "center", borderRadius: 10 },
     currencyEditText: { fontSize: 15, fontWeight: "600" },
 

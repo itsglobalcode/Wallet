@@ -174,7 +174,7 @@ export default function UserSettingsScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1 },
     header: {
-        paddingTop: 16,
+        paddingTop: 60,
         paddingHorizontal: 20,
         paddingBottom: 16,
         flexDirection: "row",

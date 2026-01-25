@@ -21,7 +21,7 @@ import ArrowLeftIcon from "@/components/svg/arrow-left"
 import SwapIcon from "@/components/svg/swap-symbol"
 import ChevronDownIcon from "@/components/svg/chevronDown-symbol"
 
-const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.API_KEY}`
+const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_KEY}`
 
 const ACCENT = "#A855F7"
 
@@ -236,8 +236,14 @@ export default function CurrencyExchangeScreen() {
             </ScrollView>
 
             {showFromPicker && (
-                <View style={[styles.pickerOverlay, { backgroundColor: "rgba(0,0,0,0.4)" }]}>
-                    <View style={[styles.pickerContainer, { backgroundColor: colors.cardBackground }]}>
+                <TouchableOpacity 
+                    style={[styles.pickerOverlay, { backgroundColor: "rgba(0,0,0,0.4)" }]} 
+                    activeOpacity={1} 
+                    onPress={() => setShowFromPicker(false)}
+                >
+                    <View 
+                        style={[styles.pickerContainer, { backgroundColor: colors.cardBackground }]} 
+                    >
                         <View style={[styles.pickerHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.pickerTitle, { color: colors.text }]}>Moneda origen</Text>
                         <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
@@ -261,12 +267,18 @@ export default function CurrencyExchangeScreen() {
                             <Text style={[styles.pickerCloseText, { color: colors.textSecondary }]}>Cerrar</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             )}
 
             {showToPicker && (
-                <View style={[styles.pickerOverlay, { backgroundColor: "rgba(0,0,0,0.4)" }]}>
-                    <View style={[styles.pickerContainer, { backgroundColor: colors.cardBackground }]}>
+                <TouchableOpacity 
+                    style={[styles.pickerOverlay, { backgroundColor: "rgba(0,0,0,0.4)" }]} 
+                    activeOpacity={1} 
+                    onPress={() => setShowToPicker(false)}
+                >
+                    <View 
+                        style={[styles.pickerContainer, { backgroundColor: colors.cardBackground }]} 
+                    >
                         <View style={[styles.pickerHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.pickerTitle, { color: colors.text }]}>Moneda destino</Text>
                         <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
@@ -290,7 +302,7 @@ export default function CurrencyExchangeScreen() {
                             <Text style={[styles.pickerCloseText, { color: colors.textSecondary }]}>Cerrar</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             )}
 
             {showAllRates && (

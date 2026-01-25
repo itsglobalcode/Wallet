@@ -38,8 +38,7 @@ export default function AcceptInvite() {
                     setLoading(false)
                     return
                 }
-
-                const res = await fetch(`${API_URL}/accept-invite`, {
+                const res = await fetch(`${WALLET_API}/accept-invite`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ inviteId: id, token: token }),

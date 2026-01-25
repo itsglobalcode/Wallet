@@ -91,11 +91,21 @@ export default function EmojiHubPicker({
     const isCurrentCategoryLoading = categoryEmojisLoading[activeCategory]
 
     return (
-        <Modal visible={visible} transparent animationType="slide">
-            <View style={styles.modalOverlay}>
-                <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                    <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
-
+        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+            <TouchableOpacity 
+                style={styles.modalOverlay} 
+                activeOpacity={1} 
+                onPress={onClose}
+            >
+                <TouchableOpacity 
+                    style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                    activeOpacity={1}
+                    onPress={(e) => e.stopPropagation()}
+                >
+                    <TouchableOpacity 
+                        style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                        onPress={onClose}
+                    />
                     <Text style={[styles.modalTitle, { color: colors.text }]}>Selecciona un emoji</Text>
 
                     {/* Categorías horizontal - Cargadas desde el header */}
@@ -108,13 +118,7 @@ export default function EmojiHubPicker({
                             return (
                                 <TouchableOpacity
                                     key={cat}
-                                    style={[
-                                        styles.categoryChip,
-                                        isActive && {
-                                            backgroundColor: ACCENT,
-                                            borderColor: ACCENT,
-                                        },
-                                    ]}
+                                    style={[styles.categoryChip, isActive && { backgroundColor: ACCENT, borderColor: ACCENT }]}
                                     onPress={() => setActiveCategory(cat)}
                                     activeOpacity={0.7}
                                 >
@@ -147,10 +151,7 @@ export default function EmojiHubPicker({
                                     const emoji = unicodeToEmoji(item.unicode)
                                     return (
                                         <TouchableOpacity
-                                            style={[
-                                                styles.emojiCell,
-                                                { backgroundColor: colors.surface, borderColor: colors.surfaceBorder },
-                                            ]}
+                                            style={[styles.emojiCell, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}
                                             onPress={() => {
                                                 onEmojiSelected(emoji)
                                                 onClose()
@@ -164,8 +165,8 @@ export default function EmojiHubPicker({
                             />
                         )}
                     </View>
-                </View>
-            </View>
+                </TouchableOpacity>
+            </TouchableOpacity>
         </Modal>
     )
 }
