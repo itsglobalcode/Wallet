@@ -15,7 +15,7 @@ import {
 import { router, useLocalSearchParams } from "expo-router"
 import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = process.env.EXPO_PUBLIC_URL 
 
 export default function AuthResetPasswordScreen() {
   const { token } = useLocalSearchParams()

@@ -29,11 +29,11 @@ import SettingsIcon from "@/components/svg/settings-symbol"
 import TrashIcon from "@/components/svg/trash-icon"
 import EmojiHubPicker from "@/components/emoji-select"
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = process.env.EXPO_PUBLIC_URL
 
 const USERS_API = `${API_URL}/api/search`
 const WALLET_API = `${API_URL}/api/wallet`
-const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_KEY}`
+const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_CURRENCY}`
 
 type Tab = "movimientos" | "saldos" | "conversor"
 
@@ -77,7 +77,7 @@ const CURRENCIES = [
 
 const getCurrency = (code: string) => CURRENCIES.find((c) => c.code === code) || { code, name: code, flag: "🌍" }
 
-export default function WalletDetailScreen() {
+export default function Wallet() {
     const { colors } = useTheme()
     const { id } = useLocalSearchParams<{ id: string }>()
     const router = useRouter()
@@ -132,7 +132,6 @@ export default function WalletDetailScreen() {
             const data = await res.json()
             setRates(data.rates || {})
         } catch (err) {
-            console.error(err)
         } finally {
             setRatesLoading(false)
         }
@@ -229,9 +228,6 @@ export default function WalletDetailScreen() {
 
             // Calcular el saldo de cada usuario
             const balancesArray = Object.values(balanceMap).map((user: any) => {
-                // Saldo = lo que pagó - lo que debería haber pagado + ajustes de transferencias
-                // Si es negativo: debe dinero (rojo)
-                // Si es positivo: le deben dinero (verde)
                 const balance = user.paid - fairShare + user.transferAdjustment
 
                 return {
@@ -243,7 +239,6 @@ export default function WalletDetailScreen() {
 
             setBalances(balancesArray)
         } catch (err) {
-            console.error(err)
         } finally {
             setLoading(false)
         }
@@ -263,7 +258,6 @@ export default function WalletDetailScreen() {
             const data = await res.json()
             setUsers(data.users || [])
         } catch (err) {
-            console.error(err)
         } finally {
             setLoadingUsers(false)
         }
@@ -283,7 +277,6 @@ export default function WalletDetailScreen() {
             setUsers([])
             setSelectedUser(null)
         } catch (err) {
-            console.error(err)
         } finally {
             setPosting(false)
         }
@@ -304,7 +297,6 @@ export default function WalletDetailScreen() {
                 body: JSON.stringify({ id, name: editName, icon: editIcon }),
             })
         } catch (err) {
-            console.error(err)
         }
         setShowEditModal(false)
         await loadData()
@@ -323,7 +315,6 @@ export default function WalletDetailScreen() {
                 body: JSON.stringify({ id }),
             })
         } catch (err) {
-            console.error(err)
         }
         setShowDeleteModal(false)
         router.push("/wallets")
@@ -335,7 +326,7 @@ export default function WalletDetailScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={[styles.loading, { backgroundColor: colors.background }]}>
+            <SafeAreaView style={[styles.loading, { backgroundColor: colors.background }]} >
                 <ActivityIndicator size="large" color={colors.textTertiary} />
             </SafeAreaView>
         )
@@ -352,23 +343,23 @@ export default function WalletDetailScreen() {
                 {travelMode ? (
                     /* Travel Mode View */
                     <View style={styles.travelModeContent}>
-                        <View style={[styles.travelSummaryCard, { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]}>
-                            <Text style={[styles.travelSummaryLabel, { color: colors.textSecondary }]}>
+                        <View style={[styles.travelSummaryCard, { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]} >
+                            <Text style={[styles.travelSummaryLabel, { color: colors.textSecondary }]} >
                                 Total gastado en {wallet?.currency}
                             </Text>
-                            <Text style={[styles.travelSummaryAmount, { color: colors.text }]}>
+                            <Text style={[styles.travelSummaryAmount, { color: colors.text }]} >
                                 {totalExpenses.toFixed(2)} {wallet?.currency}
                             </Text>
                             <View style={styles.travelSummaryDivider} />
-                            <Text style={[styles.travelSummaryLabel, { color: colors.textSecondary }]}>
+                            <Text style={[styles.travelSummaryLabel, { color: colors.textSecondary }]} >
                                 Equivalente en {homeCurrency}
                             </Text>
-                            <Text style={[styles.travelSummaryConverted, { color: ACCENT }]}>
+                            <Text style={[styles.travelSummaryConverted, { color: ACCENT }]} >
                                 ≈ {totalInHome.toFixed(2)} {homeCurrency}
                             </Text>
                         </View>
 
-                        <Text style={[styles.recentRatesTitle, { color: colors.text }]}>
+                        <Text style={[styles.recentRatesTitle, { color: colors.text }]} >
                             Tasa actual: 1 {wallet?.currency} = {getExchangeRate(wallet?.currency || "EUR", homeCurrency).toFixed(4)}{" "}
                             {homeCurrency}
                         </Text>
@@ -383,14 +374,14 @@ export default function WalletDetailScreen() {
                                 return (
                                     <View key={m._id} style={[styles.convertedMovementCard, { backgroundColor: colors.surface }]} >
                                         <View style={styles.convertedMovementLeft}>
-                                            <Text style={[styles.convertedMovementCategory, { color: colors.text }]}>
+                                            <Text style={[styles.convertedMovementCategory, { color: colors.text }]} >
                                                 {m.category?.name || "Sin categoría"}
                                             </Text>
-                                            <Text style={[styles.convertedMovementOriginal, { color: colors.textTertiary }]}>
+                                            <Text style={[styles.convertedMovementOriginal, { color: colors.textTertiary }]} >
                                                 {m.amount.toFixed(2)} {wallet?.currency}
                                             </Text>
                                         </View>
-                                        <Text style={[styles.convertedMovementValue, { color: ACCENT }]}>
+                                        <Text style={[styles.convertedMovementValue, { color: ACCENT }]} >
                                             ≈ {converted.toFixed(2)} {homeCurrency}
                                         </Text>
                                     </View>
@@ -403,20 +394,7 @@ export default function WalletDetailScreen() {
                         <View
                             style={[styles.converterCard, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}
                         >
-                            {/* From Currency */}
-                            <TouchableOpacity
-                                style={[styles.currencySelector, { backgroundColor: colors.surface }]}
-                                onPress={() => setShowFromPicker(true)}
-                            >
-                                <Text style={styles.currencyFlag}>{getCurrency(fromCurrency).flag}</Text>
-                                <View style={styles.currencyInfo}>
-                                    <Text style={[styles.currencyCode, { color: colors.text }]}>{fromCurrency}</Text>
-                                    <Text style={[styles.currencyName, { color: colors.textTertiary }]}>
-                                        {getCurrency(fromCurrency).name}
-                                    </Text>
-                                </View>
-                                <ChevronDownIcon color={colors.textTertiary} />
-                            </TouchableOpacity>
+
 
                             {/* To Currency (result) */}
                             <TouchableOpacity
@@ -426,7 +404,7 @@ export default function WalletDetailScreen() {
                                 <Text style={styles.currencyFlag}>{getCurrency(toCurrency).flag}</Text>
                                 <View style={styles.currencyInfo}>
                                     <Text style={[styles.currencyCode, { color: colors.text }]}>{toCurrency}</Text>
-                                    <Text style={[styles.currencyName, { color: colors.textTertiary }]}>
+                                    <Text style={[styles.currencyName, { color: colors.textTertiary }]} >
                                         {getCurrency(toCurrency).name}
                                     </Text>
                                 </View>
@@ -434,15 +412,15 @@ export default function WalletDetailScreen() {
                             </TouchableOpacity>
 
                             {/* Result */}
-                            <View style={[styles.converterResult, { backgroundColor: `${ACCENT}10` }]}>
-                                <Text style={[styles.converterResultAmount, { color: colors.text }]}>
+                            <View style={[styles.converterResult, { backgroundColor: `${ACCENT}10` }]} >
+                                <Text style={[styles.converterResultAmount, { color: colors.text }]} >
                                     {convertedAmount.toLocaleString("es-ES", { maximumFractionDigits: 2 })}
                                 </Text>
                                 <Text style={[styles.converterResultCurrency, { color: ACCENT }]}>{toCurrency}</Text>
                             </View>
 
                             {/* Swap Button */}
-                            <Animated.View style={[styles.swapBtnWrapper, { transform: [{ rotate: spin }] }]}>
+                            <Animated.View style={[styles.swapBtnWrapper, { transform: [{ rotate: spin }] }]} >
                                 <TouchableOpacity style={[styles.swapBtn, { backgroundColor: ACCENT }]} onPress={swapCurrencies}>
                                     <SwapIcon size={16} color="#fff" />
                                 </TouchableOpacity>
@@ -456,7 +434,7 @@ export default function WalletDetailScreen() {
                                 <Text style={styles.currencyFlag}>{getCurrency(fromCurrency).flag}</Text>
                                 <View style={styles.currencyInfo}>
                                     <Text style={[styles.currencyCode, { color: colors.text }]}>{fromCurrency}</Text>
-                                    <Text style={[styles.currencyName, { color: colors.textTertiary }]}>
+                                    <Text style={[styles.currencyName, { color: colors.textTertiary }]} >
                                         {getCurrency(fromCurrency).name}
                                     </Text>
                                 </View>
@@ -475,9 +453,9 @@ export default function WalletDetailScreen() {
                         </View>
 
                         {/* Exchange Rate Info */}
-                        <View style={[styles.rateInfoBox, { backgroundColor: colors.surface }]}>
+                        <View style={[styles.rateInfoBox, { backgroundColor: colors.surface }]} >
                             <GlobeIcon size={16} color={colors.textTertiary} />
-                            <Text style={[styles.rateInfoText, { color: colors.textSecondary }]}>
+                            <Text style={[styles.rateInfoText, { color: colors.textSecondary }]} >
                                 1 {fromCurrency} = {rate.toFixed(4)} {toCurrency}
                             </Text>
                         </View>
@@ -488,13 +466,13 @@ export default function WalletDetailScreen() {
     }
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} >
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={[styles.headerBtn, { backgroundColor: colors.surface }]}>
+                <TouchableOpacity onPress={() => router.push("/wallets")} style={[styles.headerBtn, { backgroundColor: colors.surface }]} >
                     <ArrowLeftIcon color={colors.text} />
                 </TouchableOpacity>
                 <View style={styles.headerActions}>
-                    <TouchableOpacity style={[styles.shareBtn]} onPress={() => setShowAddFriendModal(true)}>
+                    <TouchableOpacity style={[styles.shareBtn]} onPress={() => setShowAddFriendModal(true)} >
                         <ShareUserIcon size={26} color={ACCENT} />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -513,32 +491,32 @@ export default function WalletDetailScreen() {
                 <Text style={[styles.walletName, { color: colors.text }]}>{wallet?.name}</Text>
                 <View style={styles.balanceSection}>
                     <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>Balance total</Text>
-                    <Text style={[styles.totalBalance, { color: totalBalance >= 0 ? "#2E7D32" : "#C62828" }]}>
+                    <Text style={[styles.totalBalance, { color: totalBalance >= 0 ? "#2E7D32" : "#C62828" }]} >
                         {totalBalance >= 0 ? "+" : ""}
                         {totalBalance.toFixed(2)}
                         <Text style={styles.balanceCurrency}> {wallet?.currency || "€"}</Text>
                     </Text>
                 </View>
                 <View style={styles.walletTags}>
-                    <View style={[styles.tag, { backgroundColor: colors.surface }]}>
+                    <View style={[styles.tag, { backgroundColor: colors.surface }]} >
                         <Text style={[styles.tagText, { color: colors.textSecondary }]}>{wallet?.currency}</Text>
                     </View>
-                    <View style={[styles.tag, { backgroundColor: colors.surface }]}>
-                        <Text style={[styles.tagText, { color: colors.textSecondary }]}>
+                    <View style={[styles.tag, { backgroundColor: colors.surface }]} >
+                        <Text style={[styles.tagText, { color: colors.textSecondary }]} >
                             {wallet?.users?.length > 1 ? "Compartida" : "Personal"}
                         </Text>
                     </View>
                 </View>
             </View>
 
-            <View style={[styles.tabs, { borderBottomColor: colors.surfaceBorder }]}>
+            <View style={[styles.tabs, { borderBottomColor: colors.surfaceBorder }]} >
                 {(["movimientos", "saldos", "conversor"] as Tab[]).map((tab) => (
                     <TouchableOpacity
                         key={tab}
                         style={[styles.tab, activeTab === tab && styles.tabActive]}
                         onPress={() => setActiveTab(tab)}
                     >
-                        <Text style={[styles.tabText, { color: activeTab === tab ? colors.text : colors.textTertiary }]}>
+                        <Text style={[styles.tabText, { color: activeTab === tab ? colors.text : colors.textTertiary }]} >
                             {tab === "conversor" ? "Conversor" : tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </Text>
                         {activeTab === tab && <View style={[styles.tabLine, { backgroundColor: ACCENT }]} />}
@@ -563,41 +541,49 @@ export default function WalletDetailScreen() {
                         const showConversion =
                             item.originalAmount && item.originalCurrency && item.originalCurrency !== wallet?.currency
                         return (
-                            <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
-                                <View style={[styles.cardIcon, { backgroundColor: item.type === "expense" ? "#FFEBEE" : "#E8F5E9" }]}>
+                            <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]} >
+                                <View style={[styles.cardIcon, { backgroundColor: item.type === "expense" ? "#FFEBEE" : "#E8F5E9" }]} >
                                     <Text style={{ fontSize: 16 }}>{item.type === "expense" ? "↑" : "↓"}</Text>
                                 </View>
                                 <View style={styles.cardContent}>
-                                    <Text style={[styles.cardTitle, { color: colors.text }]}>
+                                    <Text style={[styles.cardTitle, { color: colors.text }]} >
                                         {item.category?.name || "Sin categoría"}
                                     </Text>
                                     <Text style={[styles.cardSub, { color: colors.textTertiary }]}>{item.user?.name || "Usuario"}</Text>
-                                    {showConversion && (
-                                        <Text style={[styles.cardOriginalAmount, { color: colors.textTertiary }]}>
-                                            Original: {item.originalAmount.toFixed(2)} {item.originalCurrency} (tasa:{" "}
-                                            {item.exchangeRate?.toFixed(4)})
-                                        </Text>
-                                    )}
                                 </View>
                                 <View style={styles.cardAmounts}>
-                                    <Text style={[styles.cardAmount, { color: item.type === "expense" ? "#C62828" : "#2E7D32" }]}>
-                                        {item.type === "expense" ? "-" : "+"}
-                                        {item.amount.toFixed(2)} {wallet?.currency}
-                                    </Text>
-                                    {convertedToHome && (
-                                        <Text style={[styles.cardConvertedAmount, { color: colors.textTertiary }]}>
-                                            ≈ {convertedToHome.toFixed(2)} {homeCurrency}
-                                        </Text>
+                                    {showConversion ? (
+                                        <>
+                                            <Text style={[styles.cardAmount, { color: item.type === "expense" ? "#C62828" : "#2E7D32", fontWeight: "800", fontSize: 16 }]} >
+                                                {item.type === "expense" ? "-" : "+"}
+                                                {item.originalAmount.toFixed(2)} {item.originalCurrency}
+                                            </Text>
+                                            <Text style={[styles.cardConvertedAmount, { color: colors.textTertiary, fontSize: 13 }]} >
+                                                ≈ {item.amount.toFixed(2)} {wallet?.currency}
+                                            </Text>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Text style={[styles.cardAmount, { color: item.type === "expense" ? "#C62828" : "#2E7D32" }]} >
+                                                {item.type === "expense" ? "-" : "+"}
+                                                {item.amount.toFixed(2)} {wallet?.currency}
+                                            </Text>
+                                            {convertedToHome && (
+                                                <Text style={[styles.cardConvertedAmount, { color: colors.textTertiary }]} >
+                                                    ≈ {convertedToHome.toFixed(2)} {homeCurrency}
+                                                </Text>
+                                            )}
+                                        </>
                                     )}
                                 </View>
                             </View>
                         )
                     }}
-                    ListEmptyComponent={
+                    ListEmptyComponent={(
                         <View style={styles.emptyList}>
                             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Sin movimientos</Text>
                         </View>
-                    }
+                    )}
                 />
             ) : (
                 <FlatList
@@ -606,8 +592,8 @@ export default function WalletDetailScreen() {
                     keyExtractor={(item) => item.userId}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => (
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
-                            <View style={[styles.avatar, { backgroundColor: colors.surface }]}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]} >
+                            <View style={[styles.avatar, { backgroundColor: colors.surface }]} >
                                 <Text style={[styles.avatarText, { color: colors.text }]}>{item.name.charAt(0)}</Text>
                             </View>
                             <View style={styles.cardContent}>
@@ -623,21 +609,21 @@ export default function WalletDetailScreen() {
                                 </Text>
                             </View>
                             <View style={styles.balanceAmountContainer}>
-                                <Text style={[styles.cardAmount, { color: item.balance >= 0 ? "#2E7D32" : "#C62828" }]}>
+                                <Text style={[styles.cardAmount, { color: item.balance >= 0 ? "#2E7D32" : "#C62828" }]} >
                                     {item.balance >= 0 ? "+" : ""}
                                     {item.balance.toFixed(2)}
                                 </Text>
-                                <Text style={[styles.balanceCurrencyLabel, { color: colors.textTertiary }]}>
+                                <Text style={[styles.balanceCurrencyLabel, { color: colors.textTertiary }]} >
                                     {wallet?.currency || "€"}
                                 </Text>
                             </View>
                         </View>
                     )}
-                    ListEmptyComponent={
+                    ListEmptyComponent={(
                         <View style={styles.emptyList}>
                             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Sin saldos</Text>
                         </View>
-                    }
+                    )}
                 />
             )}
 
@@ -651,7 +637,7 @@ export default function WalletDetailScreen() {
             )}
 
             {optionsVisible && (
-                <View style={[styles.optionsMenu, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
+                <View style={[styles.optionsMenu, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]} >
                     <TouchableOpacity style={styles.optionItem} onPress={handleEditWallet}>
                         <SettingsIcon size={18} color={colors.text} />
                         <Text style={[styles.optionText, { color: colors.text }]}>Editar wallet</Text>
@@ -670,11 +656,15 @@ export default function WalletDetailScreen() {
                 animationType="slide"
                 onRequestClose={() => setShowAddFriendModal(false)}
             >
-                <View style={styles.modalBottomOverlay}>
+                <TouchableOpacity 
+                    style={styles.modalBottomOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowAddFriendModal(false)}
+                >
                     <TouchableOpacity 
-                        style={styles.modalContainer} 
-                        activeOpacity={1} 
-                        onPress={() => setShowAddFriendModal(false)}
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                        activeOpacity={1}
+                        onPress={(e) => e.stopPropagation()}
                     >
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Compartir wallet</Text>
@@ -703,7 +693,7 @@ export default function WalletDetailScreen() {
                             />
                         )}
                         <View style={styles.modalActions}>
-                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAddFriendModal(false)}>
+                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAddFriendModal(false)} >
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -715,16 +705,20 @@ export default function WalletDetailScreen() {
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {/* Edit Modal */}
             <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
-                <View style={styles.modalBottomOverlay}>
+                <TouchableOpacity 
+                    style={styles.modalBottomOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowEditModal(false)}
+                >
                     <TouchableOpacity 
-                        style={styles.modalContainer} 
-                        activeOpacity={1} 
-                        onPress={() => setShowEditModal(false)}
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                        activeOpacity={1}
+                        onPress={(e) => e.stopPropagation()}
                     >
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Editar wallet</Text>
@@ -746,8 +740,7 @@ export default function WalletDetailScreen() {
                                 placeholderTextColor={colors.textTertiary}
                                 value={editName}
                                 onChangeText={setEditName}
-                                style={[
-                                    styles.input,
+                                style={[styles.input,
                                     {
                                         backgroundColor: colors.surface,
                                         color: colors.text,
@@ -761,7 +754,7 @@ export default function WalletDetailScreen() {
                         </View>
                         
                         <View style={styles.modalActions}>
-                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEditModal(false)}>
+                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEditModal(false)} >
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: ACCENT }]} onPress={saveWalletChanges}>
@@ -769,7 +762,7 @@ export default function WalletDetailScreen() {
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {/* Delete Modal */}
@@ -779,11 +772,15 @@ export default function WalletDetailScreen() {
                 animationType="fade"
                 onRequestClose={() => setShowDeleteModal(false)}
             >
-                <View style={styles.modalOverlay}>
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowDeleteModal(false)}
+                >
                     <TouchableOpacity 
-                        style={styles.deleteModalContainer} 
-                        activeOpacity={1} 
-                        onPress={() => setShowDeleteModal(false)}
+                        style={[styles.deleteModalContainer, { backgroundColor: colors.cardBackground }]} 
+                        activeOpacity={1}
+                        onPress={(e) => e.stopPropagation()}
                     >
                         <Text style={[styles.deleteModalTitle, { color: colors.text }]}>¿Eliminar wallet?</Text>
                         <Text style={[styles.deleteModalText, { color: colors.textSecondary }]}>
@@ -804,12 +801,12 @@ export default function WalletDetailScreen() {
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {/* Currency Picker Modals */}
             {showFromPicker && (
-                <Modal visible={showFromPicker} transparent animationType="slide" onRequestClose={() => setShowFromPicker(false)}>
+                <Modal visible={showFromPicker} transparent animationType="slide" onRequestClose={() => setShowFromPicker(false)} >
                     <TouchableOpacity 
                         style={styles.modalBottomOverlay} 
                         activeOpacity={1} 
@@ -820,7 +817,10 @@ export default function WalletDetailScreen() {
                             activeOpacity={1}
                             onPress={(e) => e.stopPropagation()}
                         >
-                            <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+                            <TouchableOpacity 
+                                style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                                onPress={() => setShowFromPicker(false)}
+                            />
                             <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda origen</Text>
                             <FlatList
                                 data={CURRENCIES}
@@ -841,7 +841,7 @@ export default function WalletDetailScreen() {
                                     </TouchableOpacity>
                                 )}
                             />
-                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowFromPicker(false)}>
+                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowFromPicker(false)} >
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cerrar</Text>
                             </TouchableOpacity>
                         </TouchableOpacity>
@@ -850,7 +850,7 @@ export default function WalletDetailScreen() {
             )}
 
             {showToPicker && (
-                <Modal visible={showToPicker} transparent animationType="slide" onRequestClose={() => setShowToPicker(false)}>
+                <Modal visible={showToPicker} transparent animationType="slide" onRequestClose={() => setShowToPicker(false)} >
                     <TouchableOpacity 
                         style={styles.modalBottomOverlay} 
                         activeOpacity={1} 
@@ -885,7 +885,7 @@ export default function WalletDetailScreen() {
                                     </TouchableOpacity>
                                 )}
                             />
-                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowToPicker(false)}>
+                            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowToPicker(false)} >
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cerrar</Text>
                             </TouchableOpacity>
                         </TouchableOpacity>
@@ -967,7 +967,7 @@ const styles = StyleSheet.create({
 
     addButton: {
         position: "absolute",
-        bottom: 40,
+        bottom: 100,
         alignSelf: "center",
         width: 56,
         height: 56,
@@ -975,7 +975,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-
     converterContainer: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
 
     travelModeToggle: {

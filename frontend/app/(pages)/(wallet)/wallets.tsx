@@ -70,7 +70,7 @@ const getFlag = (currency: string) => {
     return CURRENCY_FLAGS[code] || "💰"
 }
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL 
+const API_URL = process.env.EXPO_PUBLIC_URL 
 
 export default function WalletsScreen() {
     const { colors } = useTheme()
@@ -149,9 +149,7 @@ export default function WalletsScreen() {
             <View style={styles.header}>
                 <View style={styles.headerTitleWrapper}>
                     <Text style={[styles.headerTitle, { color: colors.text }]}>{t("wallets")}</Text>
-                    <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                        {wallets.length} {wallets.length === 1 ? t("account") : t("accounts")}
-                    </Text>
+                    <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>{wallets.length} {wallets.length === 1 ? t("account") : t("accounts")}</Text>
                 </View>
                 <TouchableOpacity
                     style={[styles.headerBtn, { backgroundColor: colors.surface }]}
@@ -163,9 +161,7 @@ export default function WalletsScreen() {
 
             <View style={[styles.summaryCard, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
                 <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Powered by Nomad</Text>
-                <Text style={[styles.summaryAmount, { color: colors.text }]}>
-                    The Neon Wallet
-                </Text>
+                <Text style={[styles.summaryAmount, { color: colors.text }]}>The Neon Wallet</Text>
             </View>
 
             <FlatList
@@ -213,24 +209,32 @@ export default function WalletsScreen() {
                 <Plus color="#fff" />
             </TouchableOpacity>
 
-            <Modal visible={createWalletVisible} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}>
-                        <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
+            <Modal visible={createWalletVisible} transparent animationType="slide" onRequestClose={() => setCreateWalletVisible(false)}>
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setCreateWalletVisible(false)}
+                >
+                    <View 
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
+                        onStartShouldSetResponder={() => true}
+                        onResponderGrant={(e) => e.stopPropagation()}
+                    >
+                        <TouchableOpacity 
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            onPress={() => setCreateWalletVisible(false)}
+                        />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>{t("newWallet")}</Text>
-
                         {errorMessage ? (
                             <View style={[styles.errorContainer, { backgroundColor: "#fee", borderColor: "#fcc" }]}>
                                 <Text style={styles.errorText}>{errorMessage}</Text>
                             </View>
                         ) : null}
-
                         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t("name")}</Text>
                         <View style={styles.emojiContainer}>
                             <TouchableOpacity style={styles.emojiButton} onPress={() => setOpen(true)}>
                                 <Text style={styles.emojiText}>{chosen || "🙂"}</Text>
                             </TouchableOpacity>
-
                             <EmojiHubPicker
                                 visible={open}
                                 onClose={() => setOpen(false)}
@@ -239,7 +243,6 @@ export default function WalletsScreen() {
                                     setEmoji(emoji)
                                 }}
                             />
-
                             <TextInput
                                 placeholder={t("exampleName")}
                                 placeholderTextColor={colors.textTertiary}
@@ -248,21 +251,9 @@ export default function WalletsScreen() {
                                     setName(text)
                                     setErrorMessage("")
                                 }}
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor: colors.surface,
-                                        color: colors.text,
-                                        borderColor: colors.surfaceBorder,
-                                        flex: 1,
-                                        height: 48,
-                                        marginLeft: 12,
-                                    },
-                                ]}
+                                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.surfaceBorder, flex: 1, height: 48, marginLeft: 12 }]}
                             />
                         </View>
-
-
                         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t("currency")}</Text>
                         <TouchableOpacity
                             style={[styles.selector, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}
@@ -272,11 +263,7 @@ export default function WalletsScreen() {
                             <Text style={[styles.selectorText, { color: colors.text }]}>{currency}</Text>
                             <ChevronRightIcon color={colors.textTertiary} />
                         </TouchableOpacity>
-
-                        <Text style={[styles.hintText, { color: colors.textTertiary }]}>
-                            {t("shareHint")}
-                        </Text>
-
+                        <Text style={[styles.hintText, { color: colors.textTertiary }]}>{t("shareHint")}</Text>
                         <View style={styles.modalActions}>
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setCreateWalletVisible(false)}>
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>{t("cancel")}</Text>
@@ -286,7 +273,7 @@ export default function WalletsScreen() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
             {/* Currency modal */}
@@ -330,13 +317,13 @@ export default function WalletsScreen() {
                     </TouchableOpacity>
                 </View>
             )}
+
         </SafeAreaView>
     )
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-
     header: {
         paddingTop: 60,
         paddingHorizontal: 24,
@@ -350,7 +337,6 @@ const styles = StyleSheet.create({
     },
     headerTitle: { fontSize: 32, fontWeight: "700", letterSpacing: -0.5 },
     headerSubtitle: { fontSize: 14, marginTop: 4 },
-
     summaryCard: {
         marginHorizontal: 20,
         marginVertical: 20,
@@ -361,9 +347,7 @@ const styles = StyleSheet.create({
     summaryLabel: { fontSize: 13, fontWeight: "500", marginBottom: 8 },
     summaryAmount: { fontSize: 36, fontWeight: "700", letterSpacing: -1 },
     summaryCurrency: { fontSize: 24, fontWeight: "400" },
-
     listContainer: { paddingHorizontal: 20, paddingBottom: 140 },
-
     walletCard: {
         flexDirection: "row",
         alignItems: "center",
@@ -379,11 +363,9 @@ const styles = StyleSheet.create({
     walletMeta: { flexDirection: "row", alignItems: "center", gap: 8 },
     walletCurrency: { fontSize: 13 },
     sharedBadge: { opacity: 0.6 },
-
     emptyState: { alignItems: "center", paddingTop: 80, gap: 8 },
     emptyText: { fontSize: 16, fontWeight: "500" },
     emptySubtext: { fontSize: 14 },
-
     addButton: {
         position: "absolute",
         bottom: 100,
@@ -394,15 +376,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-
     modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
     modalContainer: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
     modalHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 20 },
     modalTitle: { fontSize: 20, fontWeight: "700", marginBottom: 24 },
-
     inputLabel: { fontSize: 12, fontWeight: "600", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
     input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, marginBottom: 20 },
-
     emojiContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -410,7 +389,6 @@ const styles = StyleSheet.create({
         width: "100%",
         marginBottom: 20,
     },
-
     emojiButton: {
         width: 48,
         height: 48,
@@ -419,12 +397,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 20,
     },
-
     emojiText: {
         fontSize: 26,
     },
-
-
     selector: {
         flexDirection: "row",
         alignItems: "center",
@@ -436,21 +411,17 @@ const styles = StyleSheet.create({
     },
     selectorFlag: { fontSize: 20 },
     selectorText: { flex: 1, fontSize: 16, fontWeight: "500" },
-
     hintText: { fontSize: 12, marginBottom: 24, textAlign: "center" },
-
     modalActions: { flexDirection: "row", gap: 12 },
     cancelBtn: { flex: 1, paddingVertical: 16, alignItems: "center" },
     cancelBtnText: { fontSize: 16, fontWeight: "600" },
     confirmBtn: { flex: 1, paddingVertical: 16, borderRadius: 12, alignItems: "center" },
     confirmBtnText: { fontSize: 16, fontWeight: "700", color: "#fff" },
-
     currencyList: { maxHeight: 300, marginBottom: 16 },
     currencyItem: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 10, marginBottom: 4 },
     currencyItemFlag: { fontSize: 24 },
     currencyItemCode: { flex: 1, fontSize: 16, fontWeight: "500" },
     checkDot: { width: 8, height: 8, borderRadius: 4 },
-
     headerBtn: { width: 40, height: 40, borderRadius: 12, justifyContent: "center", alignItems: "center" },
     optionsMenu: {
         position: "absolute",

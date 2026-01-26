@@ -14,7 +14,7 @@ import {
 } from "react-native"
 import { router } from "expo-router"
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = process.env.EXPO_PUBLIC_URL 
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("")

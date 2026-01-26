@@ -16,7 +16,7 @@ import { Link, router } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { EyeSymbol, EyeOffSymbol } from "@/components/svg/eye-symbol"
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = process.env.EXPO_PUBLIC_URL
 
 export default function RegisterScreen() {
   const [name, setName] = useState("")
