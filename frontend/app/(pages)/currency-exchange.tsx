@@ -229,20 +229,6 @@ export default function CurrencyExchangeScreen() {
                     </View>
                 </View>
 
-                <View style={[styles.rateInfo, { backgroundColor: colors.surface }]}>
-                    <Text style={[styles.rateText, { color: colors.textSecondary }]}>
-                        1 {fromCurrency} ={" "}
-                        {(Number.parseFloat(rates[toCurrency]) / Number.parseFloat(rates[fromCurrency])).toFixed(4)} {toCurrency}
-                    </Text>
-                </View>
-
-                <View style={styles.ratesHeader}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Tasas populares</Text>
-                    <TouchableOpacity onPress={() => setShowAllRates(true)}>
-                        <Text style={[styles.seeAllBtn, { color: ACCENT }]}>Ver todas</Text>
-                    </TouchableOpacity>
-                </View>
-
                 <View style={styles.ratesGrid}>
                     {CURRENCIES.filter((c) => c.code !== "USD")
                         .slice(0, 6)

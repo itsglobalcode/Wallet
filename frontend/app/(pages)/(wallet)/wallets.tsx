@@ -74,7 +74,7 @@ const getFlag = (currency: string) => {
     return CURRENCY_FLAGS[code] || "💰"
 }
 
-const API_URL = process.env.EXPO_PUBLIC_URL 
+const API_URL = process.env.EXPO_PUBLIC_URL
 
 export default function WalletsScreen() {
     const { colors } = useTheme()
@@ -214,18 +214,18 @@ export default function WalletsScreen() {
             </TouchableOpacity>
 
             <Modal visible={createWalletVisible} transparent animationType="slide" onRequestClose={() => setCreateWalletVisible(false)}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setCreateWalletVisible(false)}
                 >
-                    <View 
+                    <View
                         style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                         onStartShouldSetResponder={() => true}
                         onResponderGrant={(e) => e.stopPropagation()}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                        <TouchableOpacity
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                             onPress={() => setCreateWalletVisible(false)}
                         />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>{t("newWallet")}</Text>
@@ -321,14 +321,13 @@ export default function WalletsScreen() {
                     </TouchableOpacity>
                 </View>
             )}
-
-            <BannerAd
-                unitId={adUnitId}
-                size={BannerAdSize.FULL_BANNER}
-                requestOptions={{
-                    requestNonPersonalizedAdsOnly: true,
-                }}
-            />
+            <View style={{ height: 60, justifyContent: "center", alignItems: "center" }}>
+                <BannerAd
+                    unitId={adUnitId}
+                    size={BannerAdSize.BANNER}
+                    requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+                />
+            </View>
 
         </SafeAreaView>
     )

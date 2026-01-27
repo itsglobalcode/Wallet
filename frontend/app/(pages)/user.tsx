@@ -1,6 +1,6 @@
 "use client"
 
-import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet, ScrollView, Switch } from "react-native"
+import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet, ScrollView, Switch, Linking } from "react-native"
 import { useRouter } from "expo-router"
 import { useTheme } from "@/contexts/ThemeContext"
 import { useLanguage } from "@/contexts/LanguageContext"
@@ -12,6 +12,10 @@ import MoonIcon from "@/components/svg/moon-symbol"
 import SunIcon from "@/components/svg/sun-symbol"
 import InfoIcon from "@/components/svg/info-symbol"
 import GlobeIcon from "@/components/svg/globe-symbol"
+
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+
+const adUnitId = __DEV__ ? TestIds.BANNER : String(process.env.EXPO_PUBLIC_AD_UNIT_ID);
 
 const ACCENT = "#A855F7"
 
@@ -96,7 +100,7 @@ export default function UserSettingsScreen() {
                             <TouchableOpacity
                                 style={[
                                     styles.languageButton,
-                                    { 
+                                    {
                                         backgroundColor: language === "es" ? ACCENT : colors.surface,
                                         borderColor: language === "es" ? ACCENT : colors.surfaceBorder,
                                     }
@@ -115,7 +119,7 @@ export default function UserSettingsScreen() {
                             <TouchableOpacity
                                 style={[
                                     styles.languageButton,
-                                    { 
+                                    {
                                         backgroundColor: language === "en" ? ACCENT : colors.surface,
                                         borderColor: language === "en" ? ACCENT : colors.surfaceBorder,
                                     }
@@ -136,29 +140,28 @@ export default function UserSettingsScreen() {
                 </View>
 
                 {/* App Info */}
-                <View style={[styles.section, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{t("about")}</Text>
-                    <View style={[styles.infoBox, { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]}>
-                        <InfoIcon size={20} color={ACCENT} />
-                        <View style={styles.infoContent}>
-                            <Text style={[styles.infoBrand, { color: colors.text }]}>NeonWallet</Text>
-                            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-                                {t("neonWalletDescription")}
-                            </Text>
-                            <Text style={[styles.infoPowered, { color: ACCENT }]}>{t("poweredBy")}</Text>
+                <TouchableOpacity onPress={() => Linking.openURL("https://thenomadapp.net")} activeOpacity={0.7}>
+                    <View style={[styles.section, { backgroundColor: colors.cardBackground, borderColor: colors.cardBorder }]}>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t("about")}</Text>
+                        <View style={[styles.infoBox, { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]}>
+                            <InfoIcon size={20} color={ACCENT} />
+                            <View style={styles.infoContent}>
+                                <Text style={[styles.infoBrand, { color: colors.text }]}>NeonWallet</Text>
+                                <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+                                    {t("neonWalletDescription")}
+                                </Text>
+                                <Text style={[styles.infoPowered, { color: ACCENT }]}>{t("poweredBy")}</Text>
+                            </View>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
 
-                {/* Nomad Info */}
-                <View style={[styles.nomadSection, { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]}>
-                    <Text style={[styles.nomadTitle, { color: colors.text }]}>{t("aboutNomad")}</Text>
-                    <Text style={[styles.nomadText, { color: colors.textSecondary }]}>
-                        {t("nomadDescription")}
-                    </Text>
-                    <Text style={[styles.nomadFeatures, { color: colors.text }]}>
-                        {t("nomadFeatures")}
-                    </Text>
+                <View style={{ height: 60, justifyContent: "center", alignItems: "center" }}>
+                    <BannerAd
+                        unitId={adUnitId}
+                        size={BannerAdSize.BANNER}
+                        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+                    />
                 </View>
 
                 {/* Version Info */}

@@ -22,6 +22,10 @@ import ArrowLeftIcon from "@/components/svg/arrow-left"
 import ChevronDownIcon from "@/components/svg/chevronDown-symbol"
 import ShareUserIcon from "@/components/svg/share-user-symbol"
 
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+
+const adUnitId = __DEV__ ? TestIds.BANNER : String(process.env.EXPO_PUBLIC_AD_UNIT_ID);
+
 const API_URL = process.env.EXPO_PUBLIC_URL
 const API = `${API_URL}/api/wallet`
 const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_CURRENCY}`
@@ -177,6 +181,14 @@ export default function AddMovementScreen() {
         }, {} as Record<string, string>)
         setUserAmounts(initialAmounts)
     }, [users, splitData])
+
+    // Validate transfer users - if transferToUser is same as selectedUser, reset it
+    useEffect(() => {
+        if (type === "transfer" && transferToUser && selectedUser && transferToUser._id === selectedUser._id) {
+            const availableUser = users.find((u) => u._id !== selectedUser._id)
+            setTransferToUser(availableUser || null)
+        }
+    }, [selectedUser, type, users, transferToUser])
 
     const fetchRates = async () => {
         try {
@@ -562,16 +574,16 @@ export default function AddMovementScreen() {
 
             {/* Category Modal */}
             <Modal visible={categoryModalVisible} transparent animationType="slide" onRequestClose={() => setCategoryModalVisible(false)}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setCategoryModalVisible(false)}
                 >
-                    <View 
+                    <View
                         style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                        <TouchableOpacity
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                             onPress={() => setCategoryModalVisible(false)}
                         />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Categoría</Text>
@@ -600,16 +612,16 @@ export default function AddMovementScreen() {
 
             {/* User Modal */}
             <Modal visible={userModalVisible} transparent animationType="slide" onRequestClose={() => setUserModalVisible(false)}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setUserModalVisible(false)}
                 >
-                    <View 
+                    <View
                         style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                        <TouchableOpacity
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                             onPress={() => setUserModalVisible(false)}
                         />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Seleccionar usuario</Text>
@@ -640,16 +652,16 @@ export default function AddMovementScreen() {
 
             {/* Transfer To User Modal */}
             <Modal visible={toUserModalVisible} transparent animationType="slide" onRequestClose={() => setToUserModalVisible(false)}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setToUserModalVisible(false)}
                 >
-                    <View 
+                    <View
                         style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                        <TouchableOpacity
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                             onPress={() => setToUserModalVisible(false)}
                         />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Transferir a</Text>
@@ -681,16 +693,16 @@ export default function AddMovementScreen() {
             </Modal>
 
             <Modal visible={currencyModalVisible} transparent animationType="slide" onRequestClose={() => setCurrencyModalVisible(false)}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setCurrencyModalVisible(false)}
                 >
-                    <View 
+                    <View
                         style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                        <TouchableOpacity
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                             onPress={() => setCurrencyModalVisible(false)}
                         />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda del gasto</Text>
@@ -721,23 +733,23 @@ export default function AddMovementScreen() {
 
             {/* Split Expense Modal */}
             <Modal visible={splitModalVisible} transparent animationType="slide" onRequestClose={() => setSplitModalVisible(false)}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setSplitModalVisible(false)}
                 >
-                    <View 
+                    <View
                         style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                        <TouchableOpacity
+                            style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                             onPress={() => setSplitModalVisible(false)}
                         />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Dividir gasto</Text>
                         <Text style={[styles.splitSubtitle, { color: colors.textSecondary }]}>
                             Total: {amount} {expenseCurrency}
                         </Text>
-                        
+
                         <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
                             {users.map((u) => (
                                 <View key={u._id} style={[styles.splitUserItem, { backgroundColor: colors.surface }]}>
@@ -751,15 +763,15 @@ export default function AddMovementScreen() {
                                     </View>
                                     <View style={styles.splitAmountInput}>
                                         <TextInput
-                                            style={[styles.splitInput, { 
-                                                backgroundColor: colors.cardBackground, 
+                                            style={[styles.splitInput, {
+                                                backgroundColor: colors.cardBackground,
                                                 color: colors.text,
-                                                borderColor: colors.surfaceBorder 
+                                                borderColor: colors.surfaceBorder
                                             }]}
                                             value={userAmounts[u._id]}
                                             onChangeText={(val) => {
                                                 setUserAmounts({ ...userAmounts, [u._id]: val })
-                                              const newSplitData = { ...splitData }
+                                                const newSplitData = { ...splitData }
                                                 newSplitData[u._id] = Number.parseFloat(val) || 0
                                                 setSplitData(newSplitData)
                                             }}
@@ -779,7 +791,7 @@ export default function AddMovementScreen() {
                             const totalSplit = Object.values(splitData).reduce((sum, val) => sum + (val || 0), 0)
                             const remaining = Number.parseFloat(amount) - totalSplit
                             const isValid = Math.abs(remaining) < 0.01 // Tolerancia para decimales
-                            
+
                             return (
                                 <View style={[styles.splitSummary, { backgroundColor: isValid ? `${ACCENT}10` : "#FFE5E5", borderColor: isValid ? `${ACCENT}30` : "#FF6B6B" }]}>
                                     <Text style={[styles.splitSummaryLabel, { color: colors.textSecondary }]}>
@@ -795,8 +807,8 @@ export default function AddMovementScreen() {
                         })()}
 
                         <View style={styles.splitActions}>
-                            <TouchableOpacity 
-                                style={[styles.splitActionBtn, { backgroundColor: colors.surface }]} 
+                            <TouchableOpacity
+                                style={[styles.splitActionBtn, { backgroundColor: colors.surface }]}
                                 onPress={() => {
                                     setSplitData(null)
                                     setSplitModalVisible(false)
@@ -804,13 +816,13 @@ export default function AddMovementScreen() {
                             >
                                 <Text style={[styles.splitActionText, { color: colors.textSecondary }]}>Cancelar</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.splitActionBtn, { backgroundColor: ACCENT }]}
                                 onPress={() => {
                                     if (splitData) {
                                         const totalSplit = Object.values(splitData).reduce((sum, val) => sum + (val || 0), 0)
                                         const remaining = Number.parseFloat(amount) - totalSplit
-                                        
+
                                         if (Math.abs(remaining) >= 0.01) {
                                             return
                                         }
@@ -824,6 +836,13 @@ export default function AddMovementScreen() {
                     </View>
                 </TouchableOpacity>
             </Modal>
+            <View style={{ height: 60, justifyContent: "center", alignItems: "center" }}>
+                <BannerAd
+                    unitId={adUnitId}
+                    size={BannerAdSize.BANNER}
+                    requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+                />
+            </View>
         </SafeAreaView>
     )
 }
@@ -844,7 +863,7 @@ const styles = StyleSheet.create({
     headerTitle: { fontSize: 17, fontWeight: "600" },
 
     content: { paddingHorizontal: 24, paddingBottom: 120 },
-  
+
     errorContainer: {
         backgroundColor: "#fee",
         borderRadius: 12,
@@ -859,7 +878,7 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontWeight: "500",
     },
-  
+
     typeSelector: { flexDirection: "row", borderRadius: 12, padding: 4, marginBottom: 32 },
     typeBtn: { flex: 1, paddingVertical: 12, alignItems: "center", borderRadius: 10 },
     typeBtnText: { fontSize: 15, fontWeight: "600" },
@@ -940,22 +959,22 @@ const styles = StyleSheet.create({
     categoryIcon: { fontSize: 22, marginRight: 12 },
 
     splitSubtitle: { fontSize: 14, marginBottom: 20, textAlign: "center" },
-    splitUserItem: { 
-        flexDirection: "row", 
-        alignItems: "center", 
+    splitUserItem: {
+        flexDirection: "row",
+        alignItems: "center",
         justifyContent: "space-between",
-        padding: 12, 
-        borderRadius: 12, 
-        marginBottom: 8 
+        padding: 12,
+        borderRadius: 12,
+        marginBottom: 8
     },
     splitUserLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
     splitUserName: { fontSize: 15, fontWeight: "500", marginLeft: 8 },
     splitAmountInput: { flexDirection: "row", alignItems: "center", gap: 6 },
-    splitInput: { 
-        width: 80, 
-        paddingVertical: 8, 
-        paddingHorizontal: 12, 
-        borderRadius: 8, 
+    splitInput: {
+        width: 80,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
         fontSize: 16,
         fontWeight: "600",
         textAlign: "right",
@@ -971,16 +990,16 @@ const styles = StyleSheet.create({
     },
     splitSummaryLabel: { fontSize: 14, fontWeight: "600" },
     splitRemaining: { fontSize: 16, fontWeight: "700", marginTop: 4 },
-    splitActions: { 
-        flexDirection: "row", 
-        gap: 12, 
-        marginTop: 16 
+    splitActions: {
+        flexDirection: "row",
+        gap: 12,
+        marginTop: 16
     },
-    splitActionBtn: { 
-        flex: 1, 
-        paddingVertical: 14, 
-        borderRadius: 12, 
-        alignItems: "center" 
+    splitActionBtn: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: "center"
     },
     splitActionText: { fontSize: 16, fontWeight: "600" },
 })

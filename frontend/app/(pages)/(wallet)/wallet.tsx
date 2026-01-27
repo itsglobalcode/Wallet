@@ -29,6 +29,12 @@ import SettingsIcon from "@/components/svg/settings-symbol"
 import TrashIcon from "@/components/svg/trash-icon"
 import EmojiHubPicker from "@/components/emoji-select"
 
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+
+const adUnitId = __DEV__ ? TestIds.BANNER : String(process.env.EXPO_PUBLIC_AD_UNIT_ID);
+
 const API_URL = process.env.EXPO_PUBLIC_URL
 
 const USERS_API = `${API_URL}/api/search`
@@ -78,6 +84,9 @@ const CURRENCIES = [
 const getCurrency = (code: string) => CURRENCIES.find((c) => c.code === code) || { code, name: code, flag: "🌍" }
 
 export default function Wallet() {
+    const insets = useSafeAreaInsets()
+
+
     const { colors } = useTheme()
     const { id } = useLocalSearchParams<{ id: string }>()
     const router = useRouter()
@@ -254,7 +263,7 @@ export default function Wallet() {
         }
         try {
             setLoadingUsers(true)
-            const res = await fetch(`${USERS_API}/users?query=${text}&id={userId}`)
+            const res = await fetch(`${USERS_API}/users?query=${text}&id=${userId}`)
             const data = await res.json()
             setUsers(data.users || [])
         } catch (err) {
@@ -359,11 +368,6 @@ export default function Wallet() {
                             </Text>
                         </View>
 
-                        <Text style={[styles.recentRatesTitle, { color: colors.text }]} >
-                            Tasa actual: 1 {wallet?.currency} = {getExchangeRate(wallet?.currency || "EUR", homeCurrency).toFixed(4)}{" "}
-                            {homeCurrency}
-                        </Text>
-
                         {/* Recent movements with conversion */}
                         <Text style={[styles.sectionTitle, { color: colors.text }]}>Últimos gastos convertidos</Text>
                         {movements
@@ -452,13 +456,6 @@ export default function Wallet() {
                             />
                         </View>
 
-                        {/* Exchange Rate Info */}
-                        <View style={[styles.rateInfoBox, { backgroundColor: colors.surface }]} >
-                            <GlobeIcon size={16} color={colors.textTertiary} />
-                            <Text style={[styles.rateInfoText, { color: colors.textSecondary }]} >
-                                1 {fromCurrency} = {rate.toFixed(4)} {toCurrency}
-                            </Text>
-                        </View>
                     </View>
                 )}
             </View>
@@ -537,7 +534,6 @@ export default function Wallet() {
                             wallet?.currency !== homeCurrency
                                 ? convertAmount(item.amount, wallet?.currency || "EUR", homeCurrency)
                                 : null
-                        const originalCurrency = item.originalCurrency || wallet?.currency
                         const showConversion =
                             item.originalAmount && item.originalCurrency && item.originalCurrency !== wallet?.currency
                         return (
@@ -656,13 +652,13 @@ export default function Wallet() {
                 animationType="slide"
                 onRequestClose={() => setShowAddFriendModal(false)}
             >
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalBottomOverlay}
                     activeOpacity={1}
                     onPress={() => setShowAddFriendModal(false)}
                 >
-                    <TouchableOpacity 
-                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                    <TouchableOpacity
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                         activeOpacity={1}
                         onPress={(e) => e.stopPropagation()}
                     >
@@ -710,23 +706,23 @@ export default function Wallet() {
 
             {/* Edit Modal */}
             <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalBottomOverlay}
                     activeOpacity={1}
                     onPress={() => setShowEditModal(false)}
                 >
-                    <TouchableOpacity 
-                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                    <TouchableOpacity
+                        style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                         activeOpacity={1}
                         onPress={(e) => e.stopPropagation()}
                     >
                         <View style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} />
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Editar wallet</Text>
-                        
+
                         <Text style={[styles.label, { color: colors.textSecondary }]}>Nombre</Text>
                         <View style={styles.emojiContainer}>
-                            <TouchableOpacity onPress={() => setEmojiPickerOpen(true)}>
-                                <Text style={{ fontSize: 28 }}>{editIcon || "🐯"}</Text>
+                            <TouchableOpacity style={styles.emojiButton} onPress={() => setEmojiPickerOpen(true)}>
+                                <Text style={styles.emojiText}>{editIcon || "🐯"}</Text>
                             </TouchableOpacity>
                             <EmojiHubPicker
                                 visible={emojiPickerOpen}
@@ -741,18 +737,18 @@ export default function Wallet() {
                                 value={editName}
                                 onChangeText={setEditName}
                                 style={[styles.input,
-                                    {
-                                        backgroundColor: colors.surface,
-                                        color: colors.text,
-                                        borderColor: colors.surfaceBorder,
-                                        flex: 1,
-                                        height: 48,
-                                        marginLeft: 12,
-                                    },
+                                {
+                                    backgroundColor: colors.surface,
+                                    color: colors.text,
+                                    borderColor: colors.surfaceBorder,
+                                    flex: 1,
+                                    height: 48,
+                                    marginLeft: 12,
+                                },
                                 ]}
                             />
                         </View>
-                        
+
                         <View style={styles.modalActions}>
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEditModal(false)} >
                                 <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancelar</Text>
@@ -772,13 +768,13 @@ export default function Wallet() {
                 animationType="fade"
                 onRequestClose={() => setShowDeleteModal(false)}
             >
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setShowDeleteModal(false)}
                 >
-                    <TouchableOpacity 
-                        style={[styles.deleteModalContainer, { backgroundColor: colors.cardBackground }]} 
+                    <TouchableOpacity
+                        style={[styles.deleteModalContainer, { backgroundColor: colors.cardBackground }]}
                         activeOpacity={1}
                         onPress={(e) => e.stopPropagation()}
                     >
@@ -807,18 +803,18 @@ export default function Wallet() {
             {/* Currency Picker Modals */}
             {showFromPicker && (
                 <Modal visible={showFromPicker} transparent animationType="slide" onRequestClose={() => setShowFromPicker(false)} >
-                    <TouchableOpacity 
-                        style={styles.modalBottomOverlay} 
-                        activeOpacity={1} 
+                    <TouchableOpacity
+                        style={styles.modalBottomOverlay}
+                        activeOpacity={1}
                         onPress={() => setShowFromPicker(false)}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                        <TouchableOpacity
+                            style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                             activeOpacity={1}
                             onPress={(e) => e.stopPropagation()}
                         >
-                            <TouchableOpacity 
-                                style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            <TouchableOpacity
+                                style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                                 onPress={() => setShowFromPicker(false)}
                             />
                             <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda origen</Text>
@@ -851,18 +847,18 @@ export default function Wallet() {
 
             {showToPicker && (
                 <Modal visible={showToPicker} transparent animationType="slide" onRequestClose={() => setShowToPicker(false)} >
-                    <TouchableOpacity 
-                        style={styles.modalBottomOverlay} 
-                        activeOpacity={1} 
+                    <TouchableOpacity
+                        style={styles.modalBottomOverlay}
+                        activeOpacity={1}
                         onPress={() => setShowToPicker(false)}
                     >
-                        <TouchableOpacity 
-                            style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]} 
+                        <TouchableOpacity
+                            style={[styles.modalContainer, { backgroundColor: colors.cardBackground }]}
                             activeOpacity={1}
                             onPress={(e) => e.stopPropagation()}
                         >
-                            <TouchableOpacity 
-                                style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]} 
+                            <TouchableOpacity
+                                style={[styles.modalHandle, { backgroundColor: colors.textTertiary }]}
                                 onPress={() => setShowToPicker(false)}
                             />
                             <Text style={[styles.modalTitle, { color: colors.text }]}>Moneda destino</Text>
@@ -892,6 +888,13 @@ export default function Wallet() {
                     </TouchableOpacity>
                 </Modal>
             )}
+            <View style={{ height: 60, justifyContent: "center", alignItems: "center" }}>
+                <BannerAd
+                    unitId={adUnitId}
+                    size={BannerAdSize.BANNER}
+                    requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+                />
+            </View>
         </SafeAreaView>
     )
 }
@@ -1098,14 +1101,14 @@ const styles = StyleSheet.create({
 
     label: { fontSize: 12, fontWeight: "600", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
     input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, marginBottom: 16 },
-    
+
     emojiContainer: {
         flexDirection: "row",
         alignItems: "center",
         width: "100%",
         marginBottom: 20,
     },
-    
+
     currencyEditSelector: { flexDirection: "row", borderRadius: 12, padding: 4, borderWidth: 1, marginBottom: 20 },
     currencyOption: { flex: 1, paddingVertical: 12, alignItems: "center", borderRadius: 10 },
     currencyEditText: { fontSize: 15, fontWeight: "600" },
@@ -1132,4 +1135,7 @@ const styles = StyleSheet.create({
     pickerItemCode: { fontSize: 16, fontWeight: "600", width: 50 },
     pickerItemName: { flex: 1, fontSize: 14 },
     checkDot: { width: 8, height: 8, borderRadius: 4 },
+
+    emojiButton: { padding: 8 },
+    emojiText: { fontSize: 28 },
 })
