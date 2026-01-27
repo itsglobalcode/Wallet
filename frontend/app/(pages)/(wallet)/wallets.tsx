@@ -27,6 +27,10 @@ import SettingsIcon from "@/components/svg/settings-symbol"
 import LogoutIcon from "@/components/svg/logout-symbol"
 import UsersIcon from "@/components/svg/user-symbol"
 
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+
+const adUnitId = __DEV__ ? TestIds.BANNER : String(process.env.EXPO_PUBLIC_AD_UNIT_ID);
+
 const ACCENT = "#A855F7"
 
 const CURRENCY_FLAGS: Record<string, string> = {
@@ -317,6 +321,14 @@ export default function WalletsScreen() {
                     </TouchableOpacity>
                 </View>
             )}
+
+            <BannerAd
+                unitId={adUnitId}
+                size={BannerAdSize.FULL_BANNER}
+                requestOptions={{
+                    requestNonPersonalizedAdsOnly: true,
+                }}
+            />
 
         </SafeAreaView>
     )

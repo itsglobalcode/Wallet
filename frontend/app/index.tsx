@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { View, ActivityIndicator, Linking } from "react-native"
+import "expo-dev-client"
 
 export default function Index() {
     const router = useRouter()
