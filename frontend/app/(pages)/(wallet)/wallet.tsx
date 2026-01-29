@@ -725,7 +725,7 @@ export default function Wallet() {
                         
                         <Text style={[styles.label, { color: colors.textSecondary }]}>Nombre</Text>
                         <View style={styles.emojiContainer}>
-                            <TouchableOpacity onPress={() => setEmojiPickerOpen(true)}>
+                            <TouchableOpacity onPress={() => setEmojiPickerOpen(true)} style={{ paddingBottom: 20 }}>
                                 <Text style={{ fontSize: 28 }}>{editIcon || "🐯"}</Text>
                             </TouchableOpacity>
                             <EmojiHubPicker
