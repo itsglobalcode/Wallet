@@ -68,7 +68,7 @@ app.get("/", (req, res) => {
 // =====================
 
 // Puerto del servidor (por defecto 3000)
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001
 
 // Iniciamos el servidor
 app.listen(PORT)

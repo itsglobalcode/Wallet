@@ -32,7 +32,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 const USERS_API = `${API_URL}/api/search`
 const WALLET_API = `${API_URL}/api/wallet`
-const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_CURRENCY_API_KEY}`
+const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_KEY}`
 
 type Tab = "movimientos" | "saldos" | "conversor"
 

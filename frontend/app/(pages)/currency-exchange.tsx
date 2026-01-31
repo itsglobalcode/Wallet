@@ -21,7 +21,7 @@ import ArrowLeftIcon from "@/components/svg/arrow-left"
 import SwapIcon from "@/components/svg/swap-symbol"
 import ChevronDownIcon from "@/components/svg/chevronDown-symbol"
 
-const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.API_KEY}`
+const CURRENCY_API = `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.EXPO_PUBLIC_API_KEY}`
 
 const ACCENT = "#A855F7"
 
